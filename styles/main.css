@@ -1,0 +1,147 @@
+/* =========================================================
+   Personal site — minimal editorial
+   Paper + ink, type-forward, generous white space.
+   ========================================================= */
+
+:root {
+  --paper: #f7f5f0;
+  --ink: #16130f;
+  --ink-soft: #6b655c;
+  --line: #ddd8cd;
+  --accent: #c2410c;
+
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --gutter: clamp(1.25rem, 5vw, 6rem);
+  --maxw: 1320px;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: clamp(1rem, 0.6vw + 0.9rem, 1.125rem);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+h1 { margin: 0; font-weight: 400; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Header / Nav ---------- */
+.site-header {
+  border-bottom: 1px solid var(--line);
+}
+.nav {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: 1.1rem var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+}
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: clamp(1.5rem, 3vw, 2.75rem);
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+}
+.nav-links a {
+  position: relative;
+  color: var(--ink-soft);
+  transition: color 0.25s ease;
+}
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { transform: scaleX(1); }
+
+/* ---------- Hero ---------- */
+main { flex: 1; max-width: var(--maxw); margin-inline: auto; width: 100%; }
+
+.hero {
+  padding: clamp(5rem, 16vw, 11rem) var(--gutter);
+}
+.eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.4rem, 6.5vw, 5.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  width: 100%;
+  padding: clamp(3rem, 8vw, 6rem) var(--gutter) clamp(2rem, 5vw, 3rem);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.footer-mail {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.6rem, 5vw, 3rem);
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+.footer-mail:hover { border-color: var(--ink); }
+.footer-copy { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .nav-links { gap: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition-duration: 0.001ms !important; }
+}
