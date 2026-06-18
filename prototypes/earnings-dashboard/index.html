@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Earnings — Insights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-state="overdue">
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">F</div>
+      <div class="name">Flowledger</div>
+    </div>
+
+    <nav class="nav-group">
+      <a class="nav-item active">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l4-4 4 3 6-7"/><path d="M3 21h18" stroke-opacity=".4"/></svg>
+        Insights
+      </a>
+      <a class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        Invoices <span class="badge">3</span>
+      </a>
+      <a class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h3.5a1.5 1.5 0 010 3h-2a1.5 1.5 0 000 3H15"/></svg>
+        Payments
+      </a>
+      <a class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        Clients
+      </a>
+      <a class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
+        Taxes
+      </a>
+      <a class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7 7 0 00-.1-2l1.8-1.4-2-3.4-2.1.9a7 7 0 00-1.7-1L14.8 3H10l-.4 2.1a7 7 0 00-1.7 1l-2.1-.9-2 3.4L5.6 11a7 7 0 000 2l-1.8 1.4 2 3.4 2.1-.9a7 7 0 001.7 1L10 21h4.8l.4-2.1a7 7 0 001.7-1l2.1.9 2-3.4L19.4 13z"/></svg>
+        Connections
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <div class="av">MR</div>
+        <div class="who"><b>Maya Reyes</b><span>Pro</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- ============================================================
+         EMPTY STATE
+         ============================================================ -->
+    <div class="empty-wrap">
+      <div class="content">
+        <div class="empty" data-show="empty">
+          <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13l4-4 4 3 6-7"/><path d="M3 20h18"/></svg></div>
+          <h2>See all your earnings in one place</h2>
+          <p>Connect your invoices, bank, or email and Flowledger pulls together what you've earned, what's scheduled, and what's overdue — automatically.</p>
+          <div class="cta">
+            <button class="btn btn-primary" style="height:40px">Connect account</button>
+            <button class="btn btn-secondary" style="height:40px">Add invoice manually</button>
+          </div>
+          <div class="connectors">
+            <div class="connector"><div class="lg" style="background:#635bff">S</div><span>Stripe</span></div>
+            <div class="connector"><div class="lg" style="background:#0a8a6f">B</div><span>Bank</span></div>
+            <div class="connector"><div class="lg" style="background:#ea4335">G</div><span>Gmail</span></div>
+            <div class="connector"><div class="lg" style="background:#1f6feb">Q</div><span>QuickBooks</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         DASHBOARD
+         ============================================================ -->
+    <div class="content dash">
+
+      <!-- ---- Page header ---- -->
+      <div class="page-head">
+        <div class="title-wrap">
+          <h1>Earnings</h1>
+          <p>Where your money is, what's coming, and what to do next.</p>
+        </div>
+        <div class="actions">
+          <button class="export-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 21h16" stroke-opacity=".5"/></svg>Export</button>
+          <button class="btn btn-primary h40" style="height:40px"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Create invoice</button>
+        </div>
+      </div>
+
+      <!-- ---- Dashboard tabs ---- -->
+      <div class="top-tabs">
+        <button class="top-tab active">Overview</button>
+        <button class="top-tab">Earnings</button>
+        <button class="top-tab">Clients</button>
+        <button class="top-tab">Cash flow</button>
+        <button class="top-tab">Taxes</button>
+      </div>
+
+      <!-- ---- Filter row ---- -->
+      <div class="filter-row">
+        <button class="control">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+          This month
+          <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="control">USD $ <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="control">All clients <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="spacer"></div>
+        <span class="sync ok"   data-show="overdue healthy growth"><span class="dot"></span>All synced · 4m ago</span>
+        <span class="sync warn" data-show="onboarding"><span class="dot pulse"></span>2 of 4 connected</span>
+        <span class="sync bad"  data-show="lowconf"><span class="dot pulse"></span>Sync issue · 2 sources</span>
+      </div>
+
+      <!-- ---- Alert banners (per state) ---- -->
+      <div class="alert danger" data-show="overdue">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2 18a2 2 0 001.7 3h16.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+        <div class="msg"><b>$8,450 is overdue across 3 invoices.</b><p>One is 21 days late. A reminder now recovers cash fastest — most clients pay within 3 days of a nudge.</p></div>
+        <div class="act"><button class="btn btn-secondary">Review all</button><button class="btn btn-primary">Send 3 reminders</button></div>
+      </div>
+      <div class="alert positive" data-show="healthy">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        <div class="msg"><b>You're in good shape this month.</b><p>92% of expected income is paid or scheduled, with nothing overdue.</p></div>
+        <div class="act"><button class="btn btn-quiet">View forecast</button></div>
+      </div>
+      <div class="alert warn" data-show="lowconf">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        <div class="msg"><b>Your numbers are incomplete.</b><p>Bank sync stopped 6 days ago and 2 invoices are missing amounts — totals may be understated.</p></div>
+        <div class="act"><button class="btn btn-secondary">What's missing</button><button class="btn btn-primary">Reconnect bank</button></div>
+      </div>
+      <div class="alert info" data-show="growth">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7" stroke-opacity=".6"/></svg>
+        <div class="msg"><b>Income is up 34% over the last quarter.</b><p>Recurring work now covers 61% of your monthly target.</p></div>
+        <div class="act"><button class="btn btn-quiet">See what's working</button></div>
+      </div>
+      <div class="alert info" data-show="onboarding" style="display:none">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <div class="msg"><b>This is a preview using sample data.</b><p>Finish connecting to replace it with your real earnings.</p></div>
+      </div>
+      <div class="card pad checklist" data-show="onboarding" style="display:none">
+        <div class="steps">
+          <div class="chk done"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-10"/></svg></span>Stripe connected</div>
+          <div class="chk done"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l4 4 10-10"/></svg></span>Gmail connected</div>
+          <div class="chk"><span class="mk"></span>Connect bank</div>
+          <div class="chk"><span class="mk"></span>Set monthly target</div>
+        </div>
+        <button class="btn btn-primary">Complete setup</button>
+      </div>
+
+      <!-- ============ KPI CARDS (selectable, before chart) ============ -->
+      <div class="kpi-row" id="kpiRow">
+        <button class="kpi selected" data-kpi="expected" style="--accent:var(--interactive)">
+          <span class="k-label">Expected this month</span>
+          <span class="k-value tnum" id="kpiExpected">$24,180</span>
+          <span class="k-foot"><span class="delta up">▲ 18%</span> vs last month</span>
+        </button>
+        <button class="kpi" data-kpi="paid" style="--accent:var(--positive)">
+          <span class="k-label"><span class="sw" style="background:var(--positive)"></span>Paid</span>
+          <span class="k-value tnum">$11,120</span>
+          <span class="k-foot"><span class="delta up">▲ 9%</span> · in account</span>
+        </button>
+        <button class="kpi" data-kpi="scheduled" style="--accent:var(--chart-paid)">
+          <span class="k-label"><span class="sw" style="background:var(--chart-paid)"></span>Scheduled</span>
+          <span class="k-value tnum">$7,250</span>
+          <span class="k-foot"><span class="delta flat">5 invoices</span> sent</span>
+        </button>
+        <button class="kpi" data-kpi="overdue" style="--accent:var(--negative)">
+          <span class="k-label"><span class="sw" style="background:var(--negative)"></span>Overdue</span>
+          <span class="k-value tnum">$3,650</span>
+          <span class="k-foot"><span class="delta down">▲ 21%</span> · 3 late</span>
+        </button>
+        <button class="kpi" data-kpi="unconfirmed" style="--accent:var(--text-secondary)">
+          <span class="k-label"><span class="sw hatch" style="width:9px;height:9px;display:inline-block;background-image:repeating-linear-gradient(45deg,#9aa0a8,#9aa0a8 2px,#c7ccd2 2px,#c7ccd2 4px)"></span>Unconfirmed</span>
+          <span class="k-value tnum">$2,160</span>
+          <span class="k-foot"><span class="delta flat">2 invoices</span> need detail</span>
+        </button>
+      </div>
+
+      <!-- ============ MAIN CHART (line, KPI-driven) ============ -->
+      <div class="section-block">
+        <div class="card chart-card">
+          <div class="chart-head">
+            <div>
+              <div class="ttl" id="lineTitle">Expected earnings over time</div>
+              <div class="sub">Tap a KPI above to change this view</div>
+            </div>
+            <div class="ctrls">
+              <span class="incomplete-tag">Based on partial data</span>
+              <div class="pill-tabs" data-pills="range">
+                <button class="on" data-range="6">6 months</button>
+                <button data-range="12">12 months</button>
+                <button data-range="3">3 months</button>
+              </div>
+            </div>
+          </div>
+          <div class="legend-cards" id="lineLegend">
+            <div class="legend-card"><span class="sw" style="background:var(--interactive)"></span><span class="lc-label">Expected</span><span class="lc-value tnum">$24,180</span></div>
+            <div class="legend-card"><span class="sw" style="background:var(--text-secondary)"></span><span class="lc-label">12-mo avg</span><span class="lc-value tnum">$20,140</span></div>
+          </div>
+          <div class="line-panel">
+            <svg class="line-svg" id="lineChart" viewBox="0 0 720 260" aria-label="Earnings line chart"></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ CASH FLOW FORECAST (stacked bars) ============ -->
+      <div class="section-block">
+        <div class="section-title">
+          <h2>Cash flow forecast</h2>
+          <span class="hint">What's likely to land, week by week</span>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-split">
+            <div>
+              <div class="chart-head">
+                <div><div class="ttl">Projected inflow</div></div>
+                <div class="ctrls">
+                  <div class="pill-tabs" data-pills="forecast">
+                    <button class="on">30 days</button><button>60 days</button><button>90 days</button>
+                  </div>
+                </div>
+              </div>
+              <div class="legend-cards">
+                <div class="legend-card"><span class="sw i-paid"></span><span class="lc-label">Paid</span></div>
+                <div class="legend-card"><span class="sw i-membership"></span><span class="lc-label">Expected</span></div>
+                <div class="legend-card"><span class="sw" style="background:var(--negative)"></span><span class="lc-label">Overdue</span></div>
+                <div class="legend-card"><span class="sw hatch"></span><span class="lc-label">Unconfirmed</span></div>
+              </div>
+              <div class="bars-panel">
+                <div class="bars">
+                  <div class="target" style="bottom:62%"><span>Target</span></div>
+                  <div class="bcol"><div class="stk" style="height:46%"><i class="i-paid" style="height:70%"></i><i class="i-membership" style="height:30%"></i></div><span class="xl">Wk 1</span></div>
+                  <div class="bcol"><div class="stk" style="height:72%"><i class="i-paid" style="height:30%"></i><i class="i-membership" style="height:48%"></i><i style="height:22%;background:var(--negative)"></i></div><span class="xl">Wk 2</span></div>
+                  <div class="bcol"><div class="stk" style="height:58%"><i class="i-membership" style="height:70%"></i><i class="i-unconfirmed" style="height:30%"></i></div><span class="xl">Wk 3</span></div>
+                  <div class="bcol"><div class="stk" style="height:84%"><i class="i-paid" style="height:20%"></i><i class="i-membership" style="height:60%"></i><i class="i-unconfirmed" style="height:20%"></i></div><span class="xl">Wk 4</span></div>
+                  <div class="bcol"><div class="stk" style="height:50%"><i class="i-membership" style="height:100%"></i></div><span class="xl">Wk 5</span></div>
+                  <div class="bcol"><div class="stk" style="height:66%"><i class="i-membership" style="height:64%"></i><i class="i-unconfirmed" style="height:36%"></i></div><span class="xl">Wk 6</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="aside">
+              <div class="metric-group">
+                <div class="mg-title">Next expected</div>
+                <div class="sheet-amt tnum" style="font-size:22px">$4,200</div>
+                <div class="muted t-body-sm">Northwind Studio · in 2 days</div>
+              </div>
+              <div class="metric-group">
+                <div class="mg-title">Projected by month end</div>
+                <div class="sheet-amt tnum" style="font-size:22px">$21,300</div>
+                <div class="muted t-body-sm">if scheduled invoices pay on time</div>
+              </div>
+              <div class="metric-group">
+                <div class="mg-title">Income gap vs target</div>
+                <div class="sheet-amt tnum" style="font-size:22px;color:var(--negative)">−$2,700</div>
+                <div class="muted t-body-sm">collecting 1 overdue invoice closes most of it</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PAYMENT PIPELINE ============ -->
+      <div class="section-block">
+        <div class="section-title"><h2>Payment pipeline</h2><span class="hint">From finished work to money in the bank</span></div>
+        <div class="card pad">
+          <div class="pipeline">
+            <div class="stage"><div class="st-top"><span class="st-name">Completed</span><span class="ct">4</span></div><div class="st-amt tnum">$5,800</div><div class="st-rail" style="background:var(--text-secondary)"></div><span class="st-act">Invoice →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Draft</span><span class="ct">2</span></div><div class="st-amt tnum">$3,400</div><div class="st-rail" style="background:var(--border)"></div><span class="st-act">Finish →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Sent</span><span class="ct">3</span></div><div class="st-amt tnum">$6,900</div><div class="st-rail" style="background:var(--interactive)"></div><span class="st-act">View →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Viewed</span><span class="ct">2</span></div><div class="st-amt tnum">$4,100</div><div class="st-rail" style="background:var(--chart-paid)"></div><span class="st-act">Nudge →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Due soon</span><span class="ct">2</span></div><div class="st-amt tnum">$6,300</div><div class="st-rail" style="background:var(--warning)"></div><span class="st-act">Remind →</span></div>
+            <div class="stage flag"><div class="st-top"><span class="st-name">Overdue</span><span class="ct">3</span></div><div class="st-amt tnum">$8,450</div><div class="st-rail" style="background:var(--negative)"></div><span class="st-act" style="color:var(--negative)">Chase →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Processing</span><span class="ct">2</span></div><div class="st-amt tnum">$3,100</div><div class="st-rail" style="background:var(--chart-free)"></div><span class="st-act">Track →</span></div>
+            <div class="stage"><div class="st-top"><span class="st-name">Paid</span><span class="ct">9</span></div><div class="st-amt tnum">$11,120</div><div class="st-rail" style="background:var(--positive)"></div><span class="st-act">Reconcile →</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ CLIENTS (ranked list, drill-in) + BREAKDOWN ============ -->
+      <div class="section-block">
+        <div class="section-title">
+          <h2>Clients</h2>
+          <div class="right">
+            <div class="pill-tabs" data-pills="clienttab"><button class="on">Top clients</button><button>Needs attention</button></div>
+          </div>
+        </div>
+        <div class="card ranked">
+          <div class="rrow head"><span></span><span>Client</span><span class="col-r">Paid</span><span class="col-r">Outstanding</span><span class="col-r">Avg days to pay</span><span class="col-r">Reliability</span></div>
+          <div class="rrow" data-client="Northwind Studio">
+            <span class="rank">1</span>
+            <div class="client-id"><span class="av" style="background:#2E93A8">NV</span><div><b>Northwind Studio</b><span>Brand · paid 4d ago</span></div></div>
+            <span class="col-r money-pos tnum">$28,400</span><span class="col-r tnum">$4,200</span><span class="col-r tnum">9 days</span>
+            <span class="col-r"><span class="score"><span class="track"><i class="good" style="width:94%"></i></span><b>94</b></span></span>
+          </div>
+          <div class="rrow" data-client="Lumen Health">
+            <span class="rank">2</span>
+            <div class="client-id"><span class="av" style="background:#2663D6">LM</span><div><b>Lumen Health</b><span>Recurring · retainer</span></div></div>
+            <span class="col-r money-pos tnum">$22,100</span><span class="col-r tnum">$0</span><span class="col-r tnum">6 days</span>
+            <span class="col-r"><span class="score"><span class="track"><i class="good" style="width:98%"></i></span><b>98</b></span></span>
+          </div>
+          <div class="rrow" data-client="Apex Ventures">
+            <span class="rank">3</span>
+            <div class="client-id"><span class="av" style="background:#7A43F6">AP</span><div><b>Apex Ventures</b><span>Web · project</span></div></div>
+            <span class="col-r money-pos tnum">$16,750</span><span class="col-r money-out tnum">$3,650</span><span class="col-r tnum">24 days</span>
+            <span class="col-r"><span class="score"><span class="track"><i class="mid" style="width:62%"></i></span><b>62</b></span></span>
+          </div>
+          <div class="rrow" data-client="Riverstone Co.">
+            <span class="rank">4</span>
+            <div class="client-id"><span class="av" style="background:#E2A900">RV</span><div><b>Riverstone Co.</b><span>Web · 21 days overdue</span></div></div>
+            <span class="col-r money-pos tnum">$9,300</span><span class="col-r money-out tnum">$4,800</span><span class="col-r tnum">31 days</span>
+            <span class="col-r"><span class="score"><span class="track"><i class="bad" style="width:38%"></i></span><b>38</b></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ EARNINGS BREAKDOWN ============ -->
+      <div class="section-block">
+        <div class="section-title"><h2>Earnings breakdown</h2><span class="hint">Where the money comes from</span></div>
+        <div class="mini-grid">
+          <div class="card mini" style="grid-column:span 2">
+            <div class="mh">Income by project type</div>
+            <div class="barlist">
+              <div class="bl"><span>Brand &amp; identity</span><b class="tnum">42%</b><span class="track"><i style="width:42%;background:var(--chart-membership)"></i></span></div>
+              <div class="bl"><span>Web &amp; product</span><b class="tnum">31%</b><span class="track"><i style="width:31%;background:var(--chart-paid)"></i></span></div>
+              <div class="bl"><span>Retainers</span><b class="tnum">19%</b><span class="track"><i style="width:19%;background:var(--chart-free)"></i></span></div>
+              <div class="bl"><span>Consulting</span><b class="tnum">8%</b><span class="track"><i style="width:8%;background:var(--chart-onetime)"></i></span></div>
+            </div>
+          </div>
+          <div class="card mini"><div class="mh">Avg invoice size</div><div class="big tnum">$3,840</div><div class="sub"><span class="delta up">▲ 12%</span> vs last quarter</div></div>
+          <div class="card mini"><div class="mh">Avg collection time</div><div class="big tnum">14 days</div><div class="sub"><span class="delta up">▼ 3 days</span> faster than Q1</div></div>
+          <div class="card mini" style="grid-column:span 2">
+            <div class="mh">Recurring vs one-off</div>
+            <div class="split"><i style="width:61%;background:var(--chart-membership)">Recurring 61%</i><i style="width:39%;background:var(--chart-onetime)">One-off 39%</i></div>
+            <div class="sub">Recurring covers <b>$14,640</b> of your monthly base.</div>
+          </div>
+          <div class="card mini"><div class="mh">Income by client</div><div class="big tnum">31%</div><div class="sub">top client share · keep it balanced</div></div>
+          <div class="card mini"><div class="mh">Active projects</div><div class="big tnum">11</div><div class="sub">across 7 clients</div></div>
+        </div>
+      </div>
+
+      <!-- ============ INVOICE TABLE (drill-in) ============ -->
+      <div class="section-block">
+        <div class="section-title"><h2>Invoices &amp; payments</h2><span class="hint">Sorted by urgency · click a row for detail</span><div class="right"><button class="export-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M8 11l4 4 4-4"/></svg>Export</button></div></div>
+        <div class="card" style="overflow:hidden">
+          <div class="toolbar">
+            <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search invoices or clients</div>
+            <span class="chip on">All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span class="chip">Client <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span class="chip">Status <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span class="chip">Date <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span class="chip">Amount <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+            <span class="chip">Source <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Invoice / Project</th><th>Client</th><th>Amount</th><th>Status</th><th>Due</th><th>Method</th><th>Last reminder</th><th>Source</th><th></th></tr></thead>
+            <tbody id="invBody">
+              <tr data-inv="#1031" data-client="Riverstone Co." data-amt="$4,800" data-status="Overdue 21 days">
+                <td class="proj"><b>#1031 · Marketing site</b><span>Web build</span></td><td>Riverstone Co.</td><td class="tnum money-out">$4,800</td>
+                <td><span class="status s-overdue"><span class="dot"></span>Overdue 21d</span></td><td class="due-warn tnum">May 26</td><td>Bank transfer</td><td class="muted">8 days ago</td>
+                <td><span class="src"><span class="lg" style="background:#ea4335">G</span>Gmail</span></td><td><div class="row-act"><button class="btn btn-primary" style="height:28px">Remind</button></div></td>
+              </tr>
+              <tr data-inv="#1028" data-client="Apex Ventures" data-amt="$3,650" data-status="Overdue 9 days">
+                <td class="proj"><b>#1028 · Q2 retainer</b><span>Consulting</span></td><td>Apex Ventures</td><td class="tnum money-out">$3,650</td>
+                <td><span class="status s-overdue"><span class="dot"></span>Overdue 9d</span></td><td class="due-warn tnum">Jun 7</td><td>Stripe</td><td class="muted">3 days ago</td>
+                <td><span class="src"><span class="lg" style="background:#635bff">S</span>Stripe</span></td><td><div class="row-act"><button class="btn btn-primary" style="height:28px">Remind</button></div></td>
+              </tr>
+              <tr data-inv="#1042" data-client="Northwind Studio" data-amt="$4,200" data-status="Due in 2 days">
+                <td class="proj"><b>#1042 · Brand system</b><span>Identity design</span></td><td>Northwind Studio</td><td class="tnum">$4,200</td>
+                <td><span class="status s-duesoon"><span class="dot"></span>Due in 2d</span></td><td class="tnum">Jun 18</td><td>Bank transfer</td><td class="muted">—</td>
+                <td><span class="src"><span class="lg" style="background:#0a8a6f">B</span>Bank</span></td><td><div class="row-act"><button class="btn btn-secondary" style="height:28px">View</button></div></td>
+              </tr>
+              <tr data-inv="#1040" data-client="Lumen Health" data-amt="$2,100" data-status="Sent · viewed">
+                <td class="proj"><b>#1040 · App redesign</b><span>Product</span></td><td>Lumen Health</td><td class="tnum">$2,100</td>
+                <td><span class="status s-sent"><span class="dot"></span>Sent · viewed</span></td><td class="tnum">Jun 24</td><td>Stripe</td><td class="muted">—</td>
+                <td><span class="src"><span class="lg" style="background:#635bff">S</span>Stripe</span></td><td><div class="row-act"><button class="btn btn-secondary" style="height:28px">Nudge</button></div></td>
+              </tr>
+              <tr data-inv="#1039" data-client="Apex Ventures" data-amt="$1,900" data-status="Processing">
+                <td class="proj"><b>#1039 · Payout</b><span>Web project</span></td><td>Apex Ventures</td><td class="tnum">$1,900</td>
+                <td><span class="status s-processing"><span class="dot"></span>Processing</span></td><td class="tnum">Jun 17</td><td>Stripe</td><td class="muted">—</td>
+                <td><span class="src"><span class="lg" style="background:#635bff">S</span>Stripe</span></td><td><div class="row-act"><button class="btn btn-secondary" style="height:28px">Track</button></div></td>
+              </tr>
+              <tr data-inv="#1043" data-client="Cedar &amp; Co." data-amt="— missing" data-status="Draft · missing amount">
+                <td class="proj"><b>#1043 · Workshop</b><span>Consulting · no amount</span></td><td>Cedar &amp; Co.</td><td class="tnum muted">— missing</td>
+                <td><span class="status s-draft"><span class="dot"></span>Draft</span></td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td>
+                <td><span class="src"><span class="lg" style="background:#9aa0a8">?</span>Manual</span></td><td><div class="row-act"><button class="btn btn-quiet" style="height:28px">Fix</button></div></td>
+              </tr>
+              <tr data-inv="#1025" data-client="Lumen Health" data-amt="$3,200" data-status="Paid">
+                <td class="proj"><b>#1025 · Landing page</b><span>Web</span></td><td>Lumen Health</td><td class="tnum money-pos">$3,200</td>
+                <td><span class="status s-paid"><span class="dot"></span>Paid</span></td><td class="muted tnum">Jun 4</td><td>Bank transfer</td><td class="muted">—</td>
+                <td><span class="src"><span class="lg" style="background:#0a8a6f">B</span>Bank</span></td><td><div class="row-act"><button class="btn btn-secondary" style="height:28px">Receipt</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ FINANCIAL HEALTH (metric groups) ============ -->
+      <div class="section-block">
+        <div class="section-title"><h2>Financial health</h2><span class="hint">The bigger picture, kept simple</span></div>
+        <div class="mini-grid" style="grid-template-columns:1.3fr 1fr 1fr">
+          <div class="card pad">
+            <div class="metric-group">
+              <div class="mg-title">Monthly target progress</div>
+              <div class="sheet-amt tnum">$16,400 <span class="muted t-body-sm" style="font-weight:400">of $24,000</span></div>
+              <div class="score" style="justify-content:flex-start;margin-top:10px"><span class="track" style="width:100%;height:10px"><i class="good" style="width:68%"></i></span></div>
+              <div class="muted t-body-sm" style="margin-top:6px">68% reached · $7,600 to go · on pace by the 24th</div>
+            </div>
+            <div class="alert warn" style="margin-top:16px"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg><div class="msg"><b class="tnum">$6,045 set aside for tax</b><p>Estimated at 25% of net income.</p></div></div>
+          </div>
+          <div class="card pad">
+            <div class="metric-group">
+              <div class="mg-title">This month</div>
+              <div class="metric"><span class="m-k">Net income (est.)</span><span class="m-v tnum">$18,135</span></div>
+              <div class="metric"><span class="m-k">Expenses deducted</span><span class="m-v tnum">$2,410</span></div>
+              <div class="metric"><span class="m-k">Tax set-aside</span><span class="m-v tnum">$6,045</span></div>
+              <div class="metric"><span class="m-k">Take-home (est.)</span><span class="m-v tnum">$15,680</span></div>
+              <div class="metric"><span class="m-k">vs last month</span><span class="m-v"><span class="delta up">▲ 18%</span></span></div>
+            </div>
+          </div>
+          <div class="card pad">
+            <div class="metric-group">
+              <div class="mg-title">Year to date</div>
+              <div class="sheet-amt tnum">$142,800</div>
+              <div class="muted t-body-sm" style="margin:2px 0 8px">across 9 clients · 38 invoices paid</div>
+              <div class="metric"><span class="m-k">YTD expenses</span><span class="m-v tnum">$18,900</span></div>
+              <div class="metric"><span class="m-k">YTD tax reserved</span><span class="m-v tnum">$31,000</span></div>
+              <div class="metric"><span class="m-k">vs last year</span><span class="m-v"><span class="delta up">▲ 27%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ GROWTH INSIGHTS ============ -->
+      <div class="section-block" data-show="growth" style="display:none;flex-direction:column;gap:12px">
+        <div class="section-title"><h2>What's working</h2><span class="hint">Useful patterns, not noise</span></div>
+        <div class="mini-grid">
+          <div class="card mini" style="grid-column:span 2"><div class="mh">Best clients this quarter</div><div class="sub" style="font-size:13px;color:var(--text-primary)">Lumen Health and Northwind brought in <b>$50,500</b> — both pay in under 10 days.</div></div>
+          <div class="card mini"><div class="mh">Recurring growth</div><div class="big tnum" style="color:var(--positive)">+34%</div><div class="sub">vs last quarter</div></div>
+          <div class="card mini"><div class="mh">3-month trend</div><div class="big tnum">$18k→24k</div><div class="sub">steady climb</div></div>
+        </div>
+      </div>
+
+      <!-- ============ CONNECTIONS & DATA QUALITY ============ -->
+      <div class="section-block">
+        <div class="section-title"><h2>Connections &amp; data quality</h2><div class="right"><span class="hint" data-show="overdue healthy growth">Last full sync 4 minutes ago</span><span class="hint" data-show="lowconf onboarding" style="color:var(--warning)">Some sources need attention</span></div></div>
+        <div class="intg-grid">
+          <div class="intg">
+            <div class="it"><span class="lg" style="background:#0a8a6f">B</span><div class="nm"><b>Bank accounts</b><span>Mercury, Chase</span></div></div>
+            <span class="st ok" data-show="overdue healthy growth onboarding"><span class="dot"></span>Connected</span>
+            <span class="st warn" data-show="lowconf"><span class="dot"></span>Sync paused 6 days ago</span>
+          </div>
+          <div class="intg"><div class="it"><span class="lg" style="background:#635bff">S</span><div class="nm"><b>Invoice source</b><span>Stripe Invoicing</span></div></div><span class="st ok"><span class="dot"></span>Connected · 12 invoices</span></div>
+          <div class="intg">
+            <div class="it"><span class="lg" style="background:#ea4335">G</span><div class="nm"><b>Email sync</b><span>Gmail detection</span></div></div>
+            <span class="st ok" data-show="overdue healthy growth lowconf"><span class="dot"></span>Connected</span>
+            <span class="st off" data-show="onboarding"><span class="dot"></span>Not connected</span>
+          </div>
+          <div class="intg">
+            <div class="it"><span class="lg" style="background:#1f6feb">Q</span><div class="nm"><b>Accounting</b><span>QuickBooks</span></div></div>
+            <span class="st off" data-show="overdue onboarding lowconf"><span class="dot"></span>Not connected</span>
+            <span class="st ok" data-show="healthy growth"><span class="dot"></span>Connected</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.dash -->
+  </div><!-- /.main -->
+</div><!-- /.app -->
+
+<!-- ============ SIDE SHEET (drill-in) ============ -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<aside class="side-sheet" id="sideSheet" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sh-ttl"><b id="sheetTitle">Invoice #1031</b><span id="sheetSub">Riverstone Co. · Marketing site</span></div>
+    <button class="sheet-close" id="sheetClose" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="sheet-body">
+    <div>
+      <div class="sheet-amt tnum" id="sheetAmt">$4,800</div>
+      <div style="margin-top:6px" id="sheetStatus"><span class="status s-overdue"><span class="dot"></span>Overdue 21 days</span></div>
+    </div>
+    <div class="metric-group">
+      <div class="mg-title">Invoice</div>
+      <div class="metric"><span class="m-k">Issued</span><span class="m-v">May 12, 2026</span></div>
+      <div class="metric"><span class="m-k">Due</span><span class="m-v due-warn">May 26, 2026</span></div>
+      <div class="metric"><span class="m-k">Payment method</span><span class="m-v">Bank transfer</span></div>
+      <div class="metric"><span class="m-k">Source</span><span class="m-v">Gmail detection</span></div>
+    </div>
+    <div class="metric-group">
+      <div class="mg-title">Timeline</div>
+      <div class="metric"><span class="m-k">Sent</span><span class="m-v muted">May 12</span></div>
+      <div class="metric"><span class="m-k">Viewed by client</span><span class="m-v muted">May 14</span></div>
+      <div class="metric"><span class="m-k">1st reminder</span><span class="m-v muted">Jun 2</span></div>
+      <div class="metric"><span class="m-k">2nd reminder</span><span class="m-v muted">Jun 8</span></div>
+    </div>
+    <div class="metric-group">
+      <div class="mg-title">Client reliability</div>
+      <div class="metric"><span class="m-k">Avg days to pay</span><span class="m-v tnum">31 days</span></div>
+      <div class="metric"><span class="m-k">Reliability score</span><span class="m-v"><span class="score"><span class="track"><i class="bad" style="width:38%"></i></span><b>38</b></span></span></div>
+      <div class="metric"><span class="m-k">Lifetime paid</span><span class="m-v tnum">$9,300</span></div>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn btn-secondary" style="flex:1;justify-content:center">Call client</button>
+    <button class="btn btn-primary" style="flex:1;justify-content:center">Send reminder</button>
+  </div>
+</aside>
+
+<!-- ============ STATE SWITCHER ============ -->
+<div class="state-switch" id="switcher">
+  <span class="lab">State</span>
+  <button data-go="empty">Empty</button>
+  <button data-go="onboarding">Onboarding</button>
+  <button data-go="healthy">Healthy</button>
+  <button data-go="overdue" class="on">Overdue</button>
+  <button data-go="lowconf">Low confidence</button>
+  <button data-go="growth">Growth</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
