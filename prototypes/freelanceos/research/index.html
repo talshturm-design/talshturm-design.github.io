@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>wipOS — User research</title>
-  <meta name="description" content="Survey findings on how freelancers track income, chase payments, and manage financial uncertainty." />
+  <title>wipOS — Research</title>
+  <meta name="description" content="How the wipOS user research was run — from landscape analysis and surveys to synthesis, themes, and prototype design." />
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
@@ -72,7 +72,6 @@
       --color-well-soft: #fafafa;
       --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
       --shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.06);
-      --scrollbar-track: #f5f5f7;
     }
     .dark {
       --color-canvas: #121214;
@@ -91,7 +90,6 @@
       --color-well-soft: #323234;
       --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
       --shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.45);
-      --scrollbar-track: #121214;
     }
     html { scrollbar-gutter: stable; }
     body {
@@ -109,6 +107,49 @@
       background: color-mix(in srgb, var(--color-canvas) 82%, transparent);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+    }
+    .timeline-line {
+      background: linear-gradient(to bottom, var(--color-border) 0%, var(--color-border) 100%);
+    }
+    .data-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 0.875rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-well-soft);
+    }
+    .data-table {
+      width: 100%;
+      min-width: 36rem;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-faint);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-well-muted);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 0.875rem 1rem;
+      vertical-align: top;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-ink);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-weight: 600; color: var(--color-ink); }
+    .data-table td:not(:first-child) { color: var(--color-muted); }
+    .data-table .rank-cell {
+      width: 3rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-faint);
     }
     @media (prefers-reduced-motion: no-preference) {
       html.theme-changing, html.theme-changing * {
@@ -143,265 +184,346 @@
     </div>
   </header>
 
-  <main class="mx-auto w-full max-w-[960px] space-y-8 px-4 py-6 md:px-6 md:py-8">
+  <main class="mx-auto w-full max-w-[960px] space-y-10 px-4 py-6 md:px-6 md:py-8">
     <section>
-      <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-faint">User research</p>
+      <p class="text-[11px] font-medium uppercase tracking-[0.18em] text-faint">Research</p>
       <h1 class="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-ink md:text-[32px]">
-        How freelancers manage income, payments &amp; uncertainty
+        From landscape scan to working prototype
       </h1>
       <p class="mt-3 max-w-[42rem] text-[14px] leading-relaxed text-muted">
-        Eight in-depth responses from Israeli freelancers and small-business owners — translated from Hebrew —
-        on what they track each month, which tools they use, and where the friction lives.
+        A six-phase research arc for wipOS — blending desk research, real freelancer voices, synthesis documents,
+        and iterative design. AI tools accelerated drafting and analysis; judgment and follow-up stayed human.
       </p>
       <div class="mt-4 flex flex-wrap gap-2">
-        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">8 responses</span>
-        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">June 2026</span>
-        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">1:1 survey</span>
+        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">Jun 2026</span>
+        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">Mixed methods</span>
+        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] font-medium text-muted">AI-assisted</span>
       </div>
     </section>
 
-    <section aria-labelledby="insights-title">
+    <section aria-labelledby="phases-title">
+      <div class="mb-6">
+        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="phases-title">Phases</h2>
+        <p class="mt-1 text-[13px] text-muted">Each step built on the last — from understanding the space to shipping a clickable prototype.</p>
+      </div>
+
+      <ol class="relative space-y-0">
+        <li class="relative grid gap-4 pb-10 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">01</span>
+            <span class="timeline-line absolute left-5 top-10 hidden h-[calc(100%-2.5rem)] w-px md:block" aria-hidden="true"></span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">Brief analysis &amp; problem framing</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">ChatGPT</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Started with a wide desk pass: what freelancers already use to track income and chase payments,
+              how competitors present financial clarity, and where the visual language feels calm vs. overwhelming.
+              From that, drafted survey questions aimed at validating the real pain — not assumptions.
+            </p>
+            <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Deep research on current solutions in the category</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Competitive visual audit — layout, tone, information hierarchy</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Survey question set for problem validation</span></li>
+            </ul>
+          </article>
+        </li>
+
+        <li class="relative grid gap-4 pb-10 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">02</span>
+            <span class="timeline-line absolute left-5 top-10 hidden h-[calc(100%-2.5rem)] w-px md:block" aria-hidden="true"></span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">User survey &amp; synthesis</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">Manual</span>
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">ChatGPT</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Ran a 1:1 survey with eight Israeli freelancers and small-business owners. Followed up on replies
+              where answers needed context. Compared raw responses against the earlier desk research — spotting
+              overlap, surprises, and gaps worth designing for.
+            </p>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Translation, light editing, and pattern-finding mixed hands-on reading with AI-assisted processing.
+            </p>
+            <a
+              href="survey/"
+              class="mt-4 inline-flex items-center gap-2 rounded-xl border border-line-strong bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-fg transition hover:opacity-90"
+            >
+              Survey findings
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </article>
+        </li>
+
+        <li class="relative grid gap-4 pb-10 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">03</span>
+            <span class="timeline-line absolute left-5 top-10 hidden h-[calc(100%-2.5rem)] w-px md:block" aria-hidden="true"></span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">Payment flow mapping</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">Synthesis doc</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Mapped how money actually moves — from finished work through invoicing, reminders, bank arrival,
+              and reconciliation. Turned scattered survey stories into a shared flow the team could design against.
+            </p>
+
+            <div class="mt-5">
+              <p class="mb-3 text-[12px] font-medium uppercase tracking-wide text-faint">Freelancer payment workflow, from project completion to money received</p>
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Step</th>
+                      <th scope="col">What happens</th>
+                      <th scope="col">Jobs-to-be-done</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1. Mark work as completed</td>
+                      <td>The freelancer finishes a task, milestone, project phase, or monthly retainer period.</td>
+                      <td>Know what work is ready to bill for. Avoid forgetting completed work. Separate “done” work from “still in progress.”</td>
+                    </tr>
+                    <tr>
+                      <td>2. Confirm client approval</td>
+                      <td>The client approves the work, either formally or informally through email, WhatsApp, Slack, etc.</td>
+                      <td>Capture proof of approval. Understand whether payment can be requested. Avoid billing too early or missing approval signals.</td>
+                    </tr>
+                    <tr>
+                      <td>3. Check scope, hours, and agreed terms</td>
+                      <td>The freelancer checks what was agreed: fixed fee, hourly rate, milestone, revisions, expenses, VAT, payment terms.</td>
+                      <td>Make sure the invoice amount is correct. Avoid undercharging. Identify extra work that should be billed.</td>
+                    </tr>
+                    <tr>
+                      <td>4. Prepare invoice details</td>
+                      <td>Client details, project name, line items, tax/VAT info, due date, payment method, invoice number.</td>
+                      <td>Generate an accurate invoice quickly. Reduce admin work. Keep invoice records consistent.</td>
+                    </tr>
+                    <tr>
+                      <td>5. Send invoice or payment request</td>
+                      <td>The invoice is sent through email, accounting software, client portal, or chat.</td>
+                      <td>Deliver the payment request in the right channel. Make sure the client received it. Track when it was sent.</td>
+                    </tr>
+                    <tr>
+                      <td>6. Track invoice status</td>
+                      <td>The freelancer waits for signs that the invoice was opened, acknowledged, approved internally, or ignored.</td>
+                      <td>Know whether to wait or follow up. Avoid manually searching email and chats. Reduce anxiety around “did they see it?”</td>
+                    </tr>
+                    <tr>
+                      <td>7. Estimate expected cash flow</td>
+                      <td>The freelancer predicts when the money should arrive based on payment terms, client habits, and past payments.</td>
+                      <td>Understand short-term income. Plan bills, savings, taxes, and runway. Know which payments are reliable or risky.</td>
+                    </tr>
+                    <tr>
+                      <td>8. Follow up on unpaid invoices</td>
+                      <td>If payment is late or close to due, the freelancer sends reminders.</td>
+                      <td>Chase payments without feeling awkward. Use the right tone. Prioritize the invoices that matter most.</td>
+                    </tr>
+                    <tr>
+                      <td>9. Detect payment received</td>
+                      <td>Money lands in the connected bank account, payment platform, or wallet.</td>
+                      <td>Know immediately that payment arrived. Match incoming money to the right invoice, client, or project.</td>
+                    </tr>
+                    <tr>
+                      <td>10. Reconcile invoice and bank transaction</td>
+                      <td>The dashboard links the paid invoice with the actual bank deposit, including partial payments, fees, currency conversion, or late payments.</td>
+                      <td>Confirm what was actually paid. Spot missing amounts. Keep records clean for accounting and taxes.</td>
+                    </tr>
+                    <tr>
+                      <td>11. Update income, taxes, and financial view</td>
+                      <td>The payment becomes part of monthly income, taxable income, cash flow, and client performance data.</td>
+                      <td>Understand net earnings, not just gross revenue. Prepare for taxes. See whether the month is on track.</td>
+                    </tr>
+                    <tr>
+                      <td>12. Learn from the client or project</td>
+                      <td>The freelancer evaluates payment speed, profitability, effort, scope creep, and repeat potential.</td>
+                      <td>Identify best clients. Decide who to prioritize, raise rates for, avoid, or follow up with for more work.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </li>
+
+        <li class="relative grid gap-4 pb-10 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">04</span>
+            <span class="timeline-line absolute left-5 top-10 hidden h-[calc(100%-2.5rem)] w-px md:block" aria-hidden="true"></span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">Theme generation</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">Synthesis doc</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Pulled recurring ideas into broader themes — the emotional weight of chasing payments, fragmented
+              tools, cash-flow anxiety, and the wish for something automatic but gentle. These became the
+              north stars for product and visual direction.
+            </p>
+
+            <div class="mt-5">
+              <p class="mb-3 text-[12px] font-medium uppercase tracking-wide text-faint">Top themes</p>
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Rank</th>
+                      <th scope="col">Theme</th>
+                      <th scope="col">Why it matters</th>
+                      <th scope="col">Product implication</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="rank-cell">1</td>
+                      <td>Payment certainty</td>
+                      <td>Freelancers care less about “revenue analytics” and more about knowing whether money is actually coming. PayPal reported that half of U.S. freelancers surveyed had experienced not being paid.</td>
+                      <td>Make expected / paid / overdue status central.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">2</td>
+                      <td>Late payments and chasing clients</td>
+                      <td>Late payment is a recurring pain. YunoJuno research reported 41% of UK freelancers are consistently paid late, with the average late invoice overdue by about two and a half weeks.</td>
+                      <td>Surface overdue invoices, reminders, and “next follow-up” actions.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">3</td>
+                      <td>Cash-flow visibility</td>
+                      <td>The key anxiety is not only “how much did I earn?” but “can I plan my month?” Intuit reported 61% of small businesses struggle with cash flow.</td>
+                      <td>Dashboard should show money in now, money expected, and risk gaps.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">4</td>
+                      <td>Fragmented workflow</td>
+                      <td>Freelancers often jump between invoices, banking apps, email, spreadsheets, and accounting tools. Reviews of FreshBooks and Bonsai praise centralizing invoices, payments, contracts, reminders, and financial visibility in one place.</td>
+                      <td>Position the dashboard as a single source of truth, not just another reporting screen.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">5</td>
+                      <td>Professionalism with clients</td>
+                      <td>PayPal’s freelancer report says 44% believed nonpayment happens because freelancers are not taken seriously, and recommends invoicing software because it saves time and positions freelancers as legitimate businesses.</td>
+                      <td>Include polished invoice/payment status, client records, and clear payment terms.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">6</td>
+                      <td>Low-friction reminders</td>
+                      <td>Chasing payment is emotionally awkward. Many business owners feel uncomfortable chasing payments because they fear sounding rude or upsetting customers.</td>
+                      <td>Automate reminders, but keep tone controlled and relationship-safe.</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">7</td>
+                      <td>Knowing which clients are worth it</td>
+                      <td>Freelancers do not only need income totals. They need to know which clients pay reliably, pay well, and create less admin burden.</td>
+                      <td>Add a “top clients” view with revenue + payment reliability, not just revenue.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </li>
+
+        <li class="relative grid gap-4 pb-10 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">05</span>
+            <span class="timeline-line absolute left-5 top-10 hidden h-[calc(100%-2.5rem)] w-px md:block" aria-hidden="true"></span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">Baseline prompts</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">ChatGPT</span>
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">Cursor</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Wrote two anchor prompts before touching pixels: a solution baseline (what the product should
+              do and feel like) and a design baseline (visual tone, density, and interaction principles).
+              These kept later iterations aligned with research instead of drifting into generic dashboard patterns.
+            </p>
+            <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Solution baseline — scope, jobs-to-be-done, success criteria</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Design baseline — calm Apple-inspired system, typography, component behavior</span></li>
+            </ul>
+          </article>
+        </li>
+
+        <li class="relative grid gap-4 md:grid-cols-[3rem_1fr] md:gap-6">
+          <div class="relative flex md:justify-center">
+            <span class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-card text-[13px] font-semibold tabular-nums text-ink shadow-card">06</span>
+          </div>
+          <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">Design, iteration &amp; deployment</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="rounded-full bg-well px-2.5 py-0.5 text-[11px] font-medium text-muted">Cursor</span>
+              </div>
+            </div>
+            <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
+              Built the wipOS prototype in Cursor — dashboard, modals, command palette, and polish passes.
+              Each round tightened spacing, motion, and copy until the experience matched the research themes:
+              one calm place for income clarity, not another accounting tool.
+            </p>
+            <a
+              href="../"
+              class="mt-4 inline-flex items-center gap-2 rounded-xl border border-line-strong bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-fg transition hover:opacity-90"
+            >
+              View wipOS prototype
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </article>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="methods-title">
       <div class="mb-4">
-        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="insights-title">Key insights</h2>
-        <p class="mt-1 text-[13px] text-muted">Patterns that came up again and again — useful anchors for product direction.</p>
+        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="methods-title">How AI was used</h2>
+        <p class="mt-1 text-[13px] text-muted">Transparency on tooling — AI sped up drafting; decisions stayed intentional.</p>
       </div>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">01</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">Chasing payments drains energy</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Reminders, delayed transfers, and not knowing whether money arrived — the emotional cost often matters as much as timing.</p>
+          <h3 class="text-[14px] font-semibold text-ink">ChatGPT</h3>
+          <p class="mt-2 text-[13px] leading-relaxed text-muted">Desk research synthesis, survey drafting, response processing, and baseline prompt writing.</p>
         </article>
         <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">02</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">Cash flow beats raw revenue</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Expected vs. paid, pending invoices, balance, and net after tax — not just “how much did I make.”</p>
+          <h3 class="text-[14px] font-semibold text-ink">Cursor</h3>
+          <p class="mt-2 text-[13px] leading-relaxed text-muted">Prototype implementation, design iterations, refinements, and deployment to the live archive.</p>
         </article>
         <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">03</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">Tools are fragmented</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Invoicing, bank apps, accountants, Excel, email, and notes each hold part of the picture. Nothing gives one calm view.</p>
-        </article>
-        <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">04</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">Manual steps feel outdated</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Receipts by hand, Excel exports, and reconciling sessions with payments were called slow — even when the tool was otherwise liked.</p>
-        </article>
-        <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">05</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">Uncertainty has many layers</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Pipeline, national instability, taxes, and tasks outside their craft (marketing, admin) all add pressure.</p>
-        </article>
-        <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
-          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">06</p>
-          <h3 class="mt-2 text-[15px] font-semibold text-ink">The dream: automatic, synced, gentle</h3>
-          <p class="mt-2 text-[13px] leading-relaxed text-muted">Auto receipts, calendar sync, smart reminders, and one place for income and tax — without becoming an accountant.</p>
+          <h3 class="text-[14px] font-semibold text-ink">Manual</h3>
+          <p class="mt-2 text-[13px] leading-relaxed text-muted">Survey outreach, follow-up conversations, judgment calls, and final editorial choices on what to ship.</p>
         </article>
       </div>
     </section>
 
-    <section aria-labelledby="questions-title">
-      <div class="mb-4">
-        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="questions-title">Survey questions</h2>
-        <p class="mt-1 text-[13px] text-muted">The prompts participants answered — shown here so responses below are easier to read in context.</p>
-      </div>
-
-      <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
-        <h3 class="text-[16px] font-semibold tracking-tight text-ink">Freelancer Payments &amp; Earnings Survey</h3>
-        <p class="mt-0.5 text-[13.5px] leading-relaxed text-muted">
-          I&apos;m exploring how freelancers manage payments, invoices, and earnings visibility. This should take about 5 minutes.
-        </p>
-
-        <ol class="mt-6 space-y-5 border-t border-line pt-6">
-          <li class="grid gap-2 md:grid-cols-[2rem_1fr] md:gap-4">
-            <span class="text-[12px] font-semibold tabular-nums text-faint">01</span>
-            <div>
-              <h4 class="text-[14px] font-semibold text-ink">Walk me through the last time you got paid by a client.</h4>
-              <p class="mt-1 text-[13px] leading-relaxed text-muted">What happened from completing the work until the money reached your account? Were there any frustrating or time-consuming steps?</p>
-            </div>
-          </li>
-          <li class="grid gap-2 md:grid-cols-[2rem_1fr] md:gap-4">
-            <span class="text-[12px] font-semibold tabular-nums text-faint">02</span>
-            <div>
-              <h4 class="text-[14px] font-semibold text-ink">What financial information do you check most often during a typical month?</h4>
-              <p class="mt-1 text-[13px] leading-relaxed text-muted">For example: upcoming payments, overdue invoices, monthly earnings, cash flow, taxes, client profitability, account balance, etc.</p>
-            </div>
-          </li>
-          <li class="grid gap-2 md:grid-cols-[2rem_1fr] md:gap-4">
-            <span class="text-[12px] font-semibold tabular-nums text-faint">03</span>
-            <div>
-              <h4 class="text-[14px] font-semibold text-ink">What causes you the most stress or uncertainty around your freelance income?</h4>
-              <p class="mt-1 text-[13px] leading-relaxed text-muted">What&apos;s the thing you find yourself thinking about or checking repeatedly?</p>
-            </div>
-          </li>
-          <li class="grid gap-2 md:grid-cols-[2rem_1fr] md:gap-4">
-            <span class="text-[12px] font-semibold tabular-nums text-faint">04</span>
-            <div>
-              <h4 class="text-[14px] font-semibold text-ink">What tools do you currently use to manage payments and earnings?</h4>
-              <p class="mt-1 text-[13px] leading-relaxed text-muted">Spreadsheets, invoicing software, banking apps, accounting tools, notes, email, etc. What works well, and what feels painful or inefficient?</p>
-            </div>
-          </li>
-          <li class="grid gap-2 md:grid-cols-[2rem_1fr] md:gap-4">
-            <span class="text-[12px] font-semibold tabular-nums text-faint">05</span>
-            <div>
-              <h4 class="text-[14px] font-semibold text-ink">If you could magically solve one problem related to getting paid, tracking income, or managing clients, what would it be?</h4>
-              <p class="mt-1 text-[13px] leading-relaxed text-muted">Why would that make the biggest difference to your business?</p>
-            </div>
-          </li>
-        </ol>
-      </article>
-    </section>
-
-    <section aria-labelledby="responses-title">
-      <div class="mb-4">
-        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="responses-title">Survey responses</h2>
-        <p class="mt-1 text-[13px] text-muted">Full answers in English. Wording lightly edited; meaning kept faithful to the original Hebrew.</p>
-      </div>
-
-      <div class="space-y-4" id="responses"></div>
-
-      <p class="mt-8 text-center text-[12.5px] leading-relaxed text-faint">
-        Source: freelancer income &amp; payments survey, June 2026. Part of the wipOS research archive.
-      </p>
-    </section>
+    <p class="text-center text-[12.5px] leading-relaxed text-faint">
+      wipOS research archive · June 2026
+    </p>
   </main>
 
   <script>
-    const responses = [
-      {
-        name: "Nurit Harshkovitz",
-        role: "Graphic designer",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Usually works on retainer plus 30 days. Some clients pay immediately when the invoice is submitted."],
-          ["What they check monthly", "Everything."],
-          ["Biggest source of stress", "Worry about maintaining steady, ongoing work and income."],
-          ["Tools in use", "Invoicing software, accountant."],
-          ["What works / what doesn\u2019t", "Her accountant\u2019s app works well."],
-          ["One problem to solve now", "No answer at the moment.", true],
-        ],
-      },
-      {
-        name: "Or Batito",
-        role: "Cosmetician",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Bank transfers via Bit, PayBox, or wire take a day or two to land. Credit-card clearing arrives once a month."],
-          ["What they check monthly", "Expenses vs. income; sets expected monthly expenses at the start of the month to plan income targets."],
-          ["Biggest source of stress", "Security uncertainty and whether there is enough work."],
-          ["Tools in use", "Invoicing software, bank app, accountant."],
-          ["What works / what doesn\u2019t", "Paperless income & expense tracking is excellent; appointment-booking app is great too."],
-          ["One problem to solve now", "Auto-generate a receipt for the client at the moment of payment \u2014 instead of creating it manually."],
-        ],
-      },
-      {
-        name: "Noa",
-        role: "Dance teacher",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Uses Morning \u2014 an app that automatically issues receipts."],
-          ["What they check monthly", "Paid vs. pending payments and total income."],
-          ["Biggest source of stress", "None reported.", true],
-          ["Tools in use", "Morning."],
-          ["What works / what doesn\u2019t", "Manual processes feel cumbersome; Morning feels good."],
-          ["One problem to solve now", "Clean export from her working app into a structured Excel file."],
-        ],
-      },
-      {
-        name: "Gal Duak",
-        role: "Dog daycare owner",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Payment doesn\u2019t happen at the moment the deal closes."],
-          ["What they check monthly", "Cash flow."],
-          ["Biggest source of stress", "Expenses."],
-          ["Tools in use", "A custom app she built herself."],
-          ["What works / what doesn\u2019t", "The custom app works for her."],
-          ["One problem to solve now", "Already solved it with her app."],
-        ],
-      },
-      {
-        name: "Natalia",
-        role: "Fashion designer & seamstress",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Works with regular clients so payment feels safe; with one-off clients she only releases work after payment."],
-          ["What they check monthly", "Expected payments, cash flow, profitability per job."],
-          ["Biggest source of stress", "How many clients she needs per month to cover costs and stay profitable \u2014 and how to bring them in."],
-          ["Tools in use", "Invoicing software, bank app, handwritten notes."],
-          ["What works / what doesn\u2019t", "Paper lists work well for her; invoicing app too."],
-          ["One problem to solve now", "Doesn\u2019t know \u2014 no clear answer.", true],
-        ],
-      },
-      {
-        name: "Reut",
-        role: "Graphic designer",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Regular clients pay on time in an orderly process."],
-          ["What they check monthly", "Most financial metrics except taxes, which she doesn\u2019t review routinely."],
-          ["Biggest source of stress", "National instability; avoiding AI and marketing \u2014 areas outside her craft that still affect income."],
-          ["Tools in use", "Invoicing software, accountant, email, notes."],
-          ["What works / what doesn\u2019t", "Built-in tools with good UX are enough; anything beyond that works less well."],
-          ["One problem to solve now", "Get paid cleanly when work finishes \u2014 no retainers, no reminders. New or large clients often need chasing, which delays payment and adds frustration."],
-        ],
-      },
-      {
-        name: "Carmi",
-        role: "Psychotherapist",
-        date: "2026-06-15",
-        dateLabel: "15 Jun 2026",
-        answers: [
-          ["Last payment experience", "Some patients pay at the end of each session; others pay monthly. She sends reminders but doesn\u2019t track whether payment actually happened \u2014 so payments slip and create chaos."],
-          ["What they check monthly", "Who hasn\u2019t paid, how many sessions have occurred, and net income after deductions."],
-          ["Biggest source of stress", "Missing a payment; billing dates out of sync with when sessions actually happened."],
-          ["Tools in use", "Excel, invoicing software, bank app, accountant, email."],
-          ["What works / what doesn\u2019t", "An Excel sheet tracking income tax, national insurance, and VAT helps her see net monthly income \u2014 that part works great."],
-          ["One problem to solve now", "One system that merges her Excel, tax payments, and calendar \u2014 with automatic billing, invoicing, and payment reminders."],
-        ],
-      },
-      {
-        name: "Hagar HaPenner",
-        role: "Educational consultant & parenting coach",
-        date: "2026-06-16",
-        dateLabel: "16 Jun 2026",
-        answers: [
-          ["Last payment experience", "A client disputed scope near the end, hadn\u2019t opened all deliverables, wanted to pay less, then delayed repeatedly. After a month of reminders she paid most of the amount; more reminders followed for the remainder."],
-          ["What they check monthly", "Expected payments, income, account balance, and tax-related costs (VAT, pension, etc.)."],
-          ["Biggest source of stress", "State-mandated costs \u2014 taxes, pension, insurance."],
-          ["Tools in use", "Accountant."],
-          ["What works / what doesn\u2019t", "Everything feels cumbersome and hard; financial admin causes the most frustration and unexpected surprises."],
-          ["One problem to solve now", "Income tracking \u2014 it isn\u2019t her profession. She excels at her work; financial tracking is harder than the work itself."],
-        ],
-      },
-    ];
-
-    const mount = document.getElementById("responses");
-    mount.innerHTML = responses.map((r) => `
-      <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
-        <header class="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
-          <div>
-            <h3 class="text-[16px] font-semibold text-ink">${r.name}</h3>
-            <p class="mt-0.5 text-[13px] text-muted">${r.role}</p>
-          </div>
-          <time class="text-[12px] text-faint" datetime="${r.date}">${r.dateLabel}</time>
-        </header>
-        <dl class="space-y-6">
-          ${r.answers.map(([q, a, muted]) => `
-            <div class="space-y-1.5">
-              <dt class="text-[11px] font-medium uppercase tracking-wide text-faint">${q}</dt>
-              <dd class="text-[13.5px] leading-relaxed ${muted ? "text-muted italic" : "text-ink"}">${a}</dd>
-            </div>
-          `).join("")}
-        </dl>
-      </article>
-    `).join("");
-
     const root = document.documentElement;
     const toggle = document.getElementById("theme-toggle");
     const label = document.getElementById("theme-label");
