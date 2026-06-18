@@ -202,9 +202,14 @@
       }
     }
     @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
     @keyframes dialogIn {
       from { opacity: 0; transform: translateY(10px) scale(0.985); }
       to { opacity: 1; transform: none; }
+    }
+    @keyframes dialogOut {
+      from { opacity: 1; transform: none; }
+      to { opacity: 0; transform: translateY(10px) scale(0.985); }
     }
   </style>
 </head>
@@ -222,6 +227,7 @@
         "react": "https://esm.sh/react@18.3.1",
         "react-dom": "https://esm.sh/react-dom@18.3.1",
         "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+        "cmdk": "https://esm.sh/cmdk@1.0.4?deps=react@18.3.1,react-dom@18.3.1",
         "recharts": "https://esm.sh/recharts@2.12.7?deps=react@18.3.1,react-dom@18.3.1",
         "lucide-react": "https://esm.sh/lucide-react@0.439.0?deps=react@18.3.1"
       }
@@ -232,14 +238,18 @@
   <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
   <script type="module">
     try {
-      const marker = '/* ---- shadcn sidebar inject ---- */';
-      const [sidebarSrc, appSrc] = await Promise.all([
+      const markerSidebar = '/* ---- shadcn sidebar inject ---- */';
+      const markerCommand = '/* ---- shadcn command inject ---- */';
+      const [sidebarSrc, commandSrc, appSrc] = await Promise.all([
         fetch('./components/ui/sidebar.tsx', { cache: 'no-store' }).then((r) => r.text()),
+        fetch('./components/ui/command.tsx', { cache: 'no-store' }).then((r) => r.text()),
         fetch('./app.tsx', { cache: 'no-store' }).then((r) => r.text()),
       ]);
-      const source = appSrc.includes(marker)
-        ? appSrc.replace(marker, sidebarSrc)
-        : sidebarSrc + '\n' + appSrc;
+      let source = appSrc;
+      if (source.includes(markerSidebar)) source = source.replace(markerSidebar, sidebarSrc);
+      else source = sidebarSrc + '\n' + source;
+      if (source.includes(markerCommand)) source = source.replace(markerCommand, commandSrc);
+      else source = commandSrc + '\n' + source;
       const { code } = Babel.transform(source, {
         filename: 'app.tsx',
         presets: [
@@ -256,5 +266,8 @@
       console.error(err);
     }
   </script>
+
+  <!-- Faster Fixes feedback widget (self-hosted) -->
+  <script type="module" src="../../scripts/faster-fixes.js" data-color="#1d1d1f" data-react="18.3.1"></script>
 </body>
 </html>

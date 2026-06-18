@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
+import { Command as CommandPrimitive } from "cmdk";
 import {
   ResponsiveContainer,
   BarChart,
@@ -13,6 +14,11 @@ import {
 import {
   PanelLeft,
   Plus,
+  Search,
+  SearchX,
+  CircleX,
+  ArrowUp,
+  ArrowDown,
   Link2,
   TrendingUp,
   Clock,
@@ -21,6 +27,7 @@ import {
   CheckCircle2,
   Bell,
   Send,
+  Loader2,
   FileText,
   GitMerge,
   SlidersHorizontal,
@@ -49,9 +56,13 @@ import {
   Settings,
   Waypoints,
   CircleDashed,
+  Flag,
+  Mic,
 } from "lucide-react";
 
 /* ---- shadcn sidebar inject ---- */
+
+/* ---- shadcn command inject ---- */
 
 /* ============================================================
    wipOS — Earnings
@@ -116,7 +127,7 @@ const TONE: Record<
 
 /* ---------------------------- mock data ---------------------------- */
 
-const KPIS = [
+const INITIAL_KPIS: { label: string; value: number; context: string; tone: Tone }[] = [
   {
     label: "Paid this month",
     value: 18420,
@@ -143,7 +154,9 @@ const KPIS = [
   },
 ];
 
-const CHART_ALL = [
+type ChartMonth = { month: string; paid: number; expected: number; overdue: number };
+
+const INITIAL_CHART_ALL: ChartMonth[] = [
   { month: "Jul", paid: 12800, expected: 5200, overdue: 800 },
   { month: "Aug", paid: 13500, expected: 6100, overdue: 1100 },
   { month: "Sep", paid: 14900, expected: 5400, overdue: 900 },
@@ -166,10 +179,10 @@ const CHART_RANGE_TABS: { label: string; months: ChartRange }[] = [
   { label: "Last 12 months", months: 12 },
 ];
 
-const chartSlice = (months: ChartRange) => CHART_ALL.slice(-months);
+const chartSlice = (chart: ChartMonth[], months: ChartRange) => chart.slice(-months);
 
-const buildOnTrackInsight = (months: ChartRange) => {
-  const data = chartSlice(months);
+const buildOnTrackInsight = (chart: ChartMonth[], months: ChartRange) => {
+  const data = chartSlice(chart, months);
   const current = data[data.length - 1];
   const prior = data.slice(0, -1);
   const currentForecast = current.paid + current.expected;
@@ -184,9 +197,11 @@ const buildOnTrackInsight = (months: ChartRange) => {
   };
 };
 
-type PaymentStatus = "due" | "expected" | "overdue" | "paid";
+type InvoiceStatus = "due" | "expected" | "overdue" | "paid";
+type PaymentStatus = InvoiceStatus | "processing";
 
 interface Payment {
+  id: string;
   client: string;
   invoice: string;
   amount: number;
@@ -195,19 +210,27 @@ interface Payment {
   action?: { label: string; icon: React.ComponentType<{ size?: number; className?: string }> };
 }
 
-const PIPELINE: {
+type PipelineColumnData = {
   key: string;
   title: string;
   tone: Tone;
   items: Payment[];
-}[] = [
+};
+
+const INITIAL_PIPELINE: PipelineColumnData[] = [
+  {
+    key: "processing",
+    title: "Processing",
+    tone: "slate",
+    items: [],
+  },
   {
     key: "overdue",
     title: "Overdue",
     tone: "red",
     items: [
-      { client: "Bluebird Studio", invoice: "INV-1041", amount: 1900, due: "Overdue 12 days", status: "overdue", action: { label: "Send reminder", icon: Send } },
-      { client: "Bluebird Studio", invoice: "INV-1039", amount: 2400, due: "Overdue 21 days", status: "overdue", action: { label: "Send reminder", icon: Send } },
+      { id: "overdue-1041", client: "Bluebird Studio", invoice: "INV-1041", amount: 1900, due: "Overdue 12 days", status: "overdue", action: { label: "Send reminder", icon: Send } },
+      { id: "overdue-1039", client: "Bluebird Studio", invoice: "INV-1039", amount: 2400, due: "Overdue 21 days", status: "overdue", action: { label: "Send reminder", icon: Send } },
     ],
   },
   {
@@ -215,8 +238,8 @@ const PIPELINE: {
     title: "Due this week",
     tone: "amber",
     items: [
-      { client: "Northstar Labs", invoice: "INV-1048", amount: 2400, due: "Due tomorrow", status: "due", action: { label: "View", icon: Eye } },
-      { client: "Vertex Co.", invoice: "INV-1050", amount: 1250, due: "Due in 3 days", status: "due", action: { label: "View", icon: Eye } },
+      { id: "due-1048", client: "Northstar Labs", invoice: "INV-1048", amount: 2400, due: "Due tomorrow", status: "due", action: { label: "View", icon: Eye } },
+      { id: "due-1050", client: "Vertex Co.", invoice: "INV-1050", amount: 1250, due: "Due in 3 days", status: "due", action: { label: "View", icon: Eye } },
     ],
   },
   {
@@ -224,8 +247,8 @@ const PIPELINE: {
     title: "Expected later",
     tone: "purple",
     items: [
-      { client: "Orbit AI", invoice: "INV-1052", amount: 3800, due: "Expected Jun 28", status: "expected", action: { label: "View", icon: Eye } },
-      { client: "Northstar Labs", invoice: "INV-1055", amount: 2400, due: "Expected Jul 2", status: "expected", action: { label: "View", icon: Eye } },
+      { id: "expected-1052", client: "Orbit AI", invoice: "INV-1052", amount: 3800, due: "Expected Jun 28", status: "expected", action: { label: "View", icon: Eye } },
+      { id: "expected-1055", client: "Northstar Labs", invoice: "INV-1055", amount: 2400, due: "Expected Jul 2", status: "expected", action: { label: "View", icon: Eye } },
     ],
   },
   {
@@ -233,8 +256,8 @@ const PIPELINE: {
     title: "Recently paid",
     tone: "green",
     items: [
-      { client: "Atlas Creative", invoice: "INV-1037", amount: 2750, due: "Paid yesterday", status: "paid", action: { label: "View", icon: Eye } },
-      { client: "Northstar Labs", invoice: "INV-1033", amount: 4200, due: "Paid 3 days ago", status: "paid", action: { label: "View", icon: Eye } },
+      { id: "paid-1037", client: "Atlas Creative", invoice: "INV-1037", amount: 2750, due: "Paid yesterday", status: "paid", action: { label: "View", icon: Eye } },
+      { id: "paid-1033", client: "Northstar Labs", invoice: "INV-1033", amount: 4200, due: "Paid 3 days ago", status: "paid", action: { label: "View", icon: Eye } },
     ],
   },
 ];
@@ -331,20 +354,342 @@ const INITIAL_CLIENT_NOTES: Record<string, string> = {
   "Bluebird Studio": "Chasing INV-1041 this week",
 };
 
-const ACTIVITY: { text: React.ReactNode; time: string; tone: Tone; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { text: (<>Payment detected via <b className="font-medium text-ink">Wise</b> from Atlas Creative</>), time: "Yesterday, 4:12 PM", tone: "green", icon: Wallet },
-  { text: (<><b className="font-medium text-ink">Bluebird Studio</b> replied on WhatsApp to your reminder</>), time: "Yesterday, 11:48 AM", tone: "slate", icon: MessageCircle },
-  { text: (<>Invoice <b className="font-medium text-ink">INV-1052</b> sent to Orbit AI</>), time: "Jun 14, 2:30 PM", tone: "purple", icon: FileText },
-  { text: (<><b className="font-medium text-ink">Orbit AI</b> replied in Slack about INV-1052</>), time: "Jun 14, 4:05 PM", tone: "slate", icon: Slack },
-  { text: (<><b className="font-medium text-ink">Northstar Labs</b> viewed invoice</>), time: "Jun 13, 6:48 PM", tone: "slate", icon: Eye },
-  { text: (<>Payment matched to <b className="font-medium text-ink">INV-1037</b> via Stripe</>), time: "Jun 13, 4:12 PM", tone: "green", icon: GitMerge },
-  { text: (<><b className="font-medium text-ink">Northstar Labs</b> replied by email about INV-1055</>), time: "Jun 13, 3:20 PM", tone: "slate", icon: Mail },
-  { text: (<>Invoice <b className="font-medium text-ink">INV-1048</b> due tomorrow</>), time: "Jun 13, 10:00 AM", tone: "amber", icon: Clock },
-  { text: (<>Overdue alert for <b className="font-medium text-ink">Bluebird Studio</b></>), time: "Jun 12, 9:00 AM", tone: "red", icon: AlertTriangle },
-  { text: (<>Payment detected via <b className="font-medium text-ink">PayPal</b> from Northstar Labs</>), time: "Jun 11, 11:20 AM", tone: "green", icon: Banknote },
+interface ActivityMessagePreview {
+  channel: "WhatsApp" | "Slack" | "Email";
+  author: string;
+  context?: string;
+  body: string;
+}
+
+interface ActivityItem {
+  id: string;
+  text: React.ReactNode;
+  time: string;
+  tone: Tone;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  summary: string;
+  sourceDetected: boolean;
+  source?: string;
+  details: { label: string; value: string }[];
+  invoiceId?: string;
+  client?: string;
+  messagePreview?: ActivityMessagePreview;
+}
+
+const ACTIVITY_VISIBLE_COUNT = 10;
+const ADD_EARNING_PREFILL = "I got paid in cash from Northstar Labs for $2,400 yesterday.";
+const CASH_MATCH_CLIENT = "Northstar Labs";
+const CASH_MATCH_INVOICE = "INV-1048";
+const CASH_PAYMENT_ID = "due-1048";
+const CASH_MATCH_AMOUNT = 2400;
+const CASH_PROCESSING_MS = 4000;
+
+const applyCashEarningStats = (
+  kpis: { label: string; value: number; context: string; tone: Tone }[],
+  chart: ChartMonth[]
+) => ({
+  kpis: kpis.map((k) => {
+    if (k.label === "Paid this month") {
+      return { ...k, value: k.value + CASH_MATCH_AMOUNT, context: "+15% vs last month" };
+    }
+    if (k.label === "Year-to-date earnings") {
+      const value = k.value + CASH_MATCH_AMOUNT;
+      return { ...k, value, context: `${Math.round((value / 200000) * 100)}% of annual goal` };
+    }
+    return k;
+  }),
+  chart: chart.map((m, i) =>
+    i === chart.length - 1 ? { ...m, paid: m.paid + CASH_MATCH_AMOUNT } : m
+  ),
+});
+
+const EarningsStatsCtx = React.createContext<{ kpis: typeof INITIAL_KPIS; chart: ChartMonth[] }>({
+  kpis: INITIAL_KPIS,
+  chart: INITIAL_CHART_ALL,
+});
+const useEarningsStats = () => React.useContext(EarningsStatsCtx);
+
+const INITIAL_ACTIVITY: ActivityItem[] = [
+  {
+    id: "wise-atlas",
+    text: (<>Payment detected via <b className="font-medium text-ink">Wise</b> from Atlas Creative</>),
+    time: "Yesterday, 4:12 PM",
+    tone: "green",
+    icon: Wallet,
+    title: "Payment detected",
+    summary: "A $2,800 payment from Atlas Creative was matched automatically through your Wise connection.",
+    sourceDetected: true,
+    source: "Wise",
+    client: "Atlas Creative",
+    invoiceId: "INV-1042",
+    details: [
+      { label: "Amount", value: "$2,800" },
+      { label: "Client", value: "Atlas Creative" },
+      { label: "Matched to", value: "INV-1042" },
+      { label: "Detected at", value: "Yesterday, 4:12 PM" },
+    ],
+  },
+  {
+    id: "whatsapp-bluebird",
+    text: (<><b className="font-medium text-ink">Bluebird Studio</b> replied on WhatsApp to your reminder</>),
+    time: "Yesterday, 11:48 AM",
+    tone: "slate",
+    icon: MessageCircle,
+    title: "Client reply",
+    summary: "Bluebird Studio responded on WhatsApp after your payment reminder for INV-1041.",
+    sourceDetected: true,
+    source: "WhatsApp",
+    client: "Bluebird Studio",
+    invoiceId: "INV-1041",
+    details: [
+      { label: "Client", value: "Bluebird Studio" },
+      { label: "Channel", value: "WhatsApp" },
+      { label: "Invoice", value: "INV-1041" },
+      { label: "Received at", value: "Yesterday, 11:48 AM" },
+    ],
+    messagePreview: {
+      channel: "WhatsApp",
+      author: "Bluebird Studio",
+      context: "Reply to your reminder",
+      body: "Got it — we'll send payment for INV-1041 by Friday. Sorry for the delay!",
+    },
+  },
+  {
+    id: "sent-orbit-1052",
+    text: (<>Invoice <b className="font-medium text-ink">INV-1052</b> sent to Orbit AI</>),
+    time: "Jun 14, 2:30 PM",
+    tone: "purple",
+    icon: FileText,
+    title: "Invoice sent",
+    summary: "You sent INV-1052 to Orbit AI for $3,200. The client was notified by email.",
+    sourceDetected: false,
+    client: "Orbit AI",
+    invoiceId: "INV-1052",
+    details: [
+      { label: "Invoice", value: "INV-1052" },
+      { label: "Client", value: "Orbit AI" },
+      { label: "Amount", value: "$3,200" },
+      { label: "Sent at", value: "Jun 14, 2:30 PM" },
+    ],
+  },
+  {
+    id: "slack-orbit-1052",
+    text: (<><b className="font-medium text-ink">Orbit AI</b> replied in Slack about INV-1052</>),
+    time: "Jun 14, 4:05 PM",
+    tone: "slate",
+    icon: Slack,
+    title: "Client reply",
+    summary: "Orbit AI replied in your shared Slack channel confirming they will process INV-1052 this week.",
+    sourceDetected: true,
+    source: "Slack",
+    client: "Orbit AI",
+    invoiceId: "INV-1052",
+    details: [
+      { label: "Client", value: "Orbit AI" },
+      { label: "Channel", value: "#orbit-finance" },
+      { label: "Invoice", value: "INV-1052" },
+      { label: "Received at", value: "Jun 14, 4:05 PM" },
+    ],
+    messagePreview: {
+      channel: "Slack",
+      author: "Orbit AI",
+      context: "#orbit-finance",
+      body: "Thanks for the ping — AP will process INV-1052 this week. Should land by Thursday.",
+    },
+  },
+  {
+    id: "viewed-northstar",
+    text: (<><b className="font-medium text-ink">Northstar Labs</b> viewed invoice</>),
+    time: "Jun 13, 6:48 PM",
+    tone: "slate",
+    icon: Eye,
+    title: "Invoice viewed",
+    summary: "Northstar Labs opened the payment link for INV-1055.",
+    sourceDetected: false,
+    client: "Northstar Labs",
+    invoiceId: "INV-1055",
+    details: [
+      { label: "Client", value: "Northstar Labs" },
+      { label: "Invoice", value: "INV-1055" },
+      { label: "Amount", value: "$4,800" },
+      { label: "Viewed at", value: "Jun 13, 6:48 PM" },
+    ],
+  },
+  {
+    id: "stripe-1037",
+    text: (<>Payment matched to <b className="font-medium text-ink">INV-1037</b> via Stripe</>),
+    time: "Jun 13, 4:12 PM",
+    tone: "green",
+    icon: GitMerge,
+    title: "Payment matched",
+    summary: "A Stripe payout was automatically matched to INV-1037 for Northstar Labs.",
+    sourceDetected: true,
+    source: "Stripe",
+    client: "Northstar Labs",
+    invoiceId: "INV-1037",
+    details: [
+      { label: "Invoice", value: "INV-1037" },
+      { label: "Client", value: "Northstar Labs" },
+      { label: "Amount", value: "$1,950" },
+      { label: "Matched at", value: "Jun 13, 4:12 PM" },
+    ],
+  },
+  {
+    id: "email-northstar-1055",
+    text: (<><b className="font-medium text-ink">Northstar Labs</b> replied by email about INV-1055</>),
+    time: "Jun 13, 3:20 PM",
+    tone: "slate",
+    icon: Mail,
+    title: "Client reply",
+    summary: "Northstar Labs replied by email confirming accounts payable will review INV-1055.",
+    sourceDetected: true,
+    source: "Email",
+    client: "Northstar Labs",
+    invoiceId: "INV-1055",
+    details: [
+      { label: "Client", value: "Northstar Labs" },
+      { label: "Channel", value: "Email" },
+      { label: "Invoice", value: "INV-1055" },
+      { label: "Received at", value: "Jun 13, 3:20 PM" },
+    ],
+    messagePreview: {
+      channel: "Email",
+      author: "Northstar Labs",
+      context: "Re: Invoice INV-1055 — payment timing",
+      body: "Hi Jordan,\n\nWe've received INV-1055 and AP will review it this week. Expect payment by end of month.\n\nBest,\nMorgan",
+    },
+  },
+  {
+    id: "due-1048",
+    text: (<>Invoice <b className="font-medium text-ink">INV-1048</b> due tomorrow</>),
+    time: "Jun 13, 10:00 AM",
+    tone: "amber",
+    icon: Clock,
+    title: "Due soon",
+    summary: "INV-1048 for Northstar Labs is due tomorrow. No payment has been recorded yet.",
+    sourceDetected: false,
+    client: "Northstar Labs",
+    invoiceId: "INV-1048",
+    details: [
+      { label: "Invoice", value: "INV-1048" },
+      { label: "Client", value: "Northstar Labs" },
+      { label: "Amount", value: "$2,400" },
+      { label: "Due", value: "Jun 17, 2026" },
+    ],
+  },
+  {
+    id: "overdue-bluebird",
+    text: (<>Overdue alert for <b className="font-medium text-ink">Bluebird Studio</b></>),
+    time: "Jun 12, 9:00 AM",
+    tone: "red",
+    icon: AlertTriangle,
+    title: "Overdue alert",
+    summary: "Bluebird Studio has $1,800 overdue across open invoices. A reminder is recommended.",
+    sourceDetected: false,
+    client: "Bluebird Studio",
+    invoiceId: "INV-1041",
+    details: [
+      { label: "Client", value: "Bluebird Studio" },
+      { label: "Overdue", value: "$1,800" },
+      { label: "Open invoices", value: "INV-1041" },
+      { label: "Alert at", value: "Jun 12, 9:00 AM" },
+    ],
+  },
+  {
+    id: "paypal-northstar",
+    text: (<>Payment detected via <b className="font-medium text-ink">PayPal</b> from Northstar Labs</>),
+    time: "Jun 11, 11:20 AM",
+    tone: "green",
+    icon: Banknote,
+    title: "Payment detected",
+    summary: "A $4,800 PayPal payment from Northstar Labs was detected and matched to INV-1055.",
+    sourceDetected: true,
+    source: "PayPal",
+    client: "Northstar Labs",
+    invoiceId: "INV-1055",
+    details: [
+      { label: "Amount", value: "$4,800" },
+      { label: "Client", value: "Northstar Labs" },
+      { label: "Matched to", value: "INV-1055" },
+      { label: "Detected at", value: "Jun 11, 11:20 AM" },
+    ],
+  },
 ];
 
-/* ---------------------------- invoices ---------------------------- */
+const buildCashProcessingActivity = (): ActivityItem => ({
+  id: `cash-processing-${Date.now()}`,
+  text: (<>Cash payment reported — wipOS is <b className="font-medium text-ink">matching sources</b></>),
+  time: "Just now",
+  tone: "slate",
+  icon: CircleDashed,
+  title: "Cash payment",
+  summary: "Looking for a matching invoice, client record, and related WhatsApp or email threads.",
+  sourceDetected: false,
+  client: CASH_MATCH_CLIENT,
+  details: [
+    { label: "Amount", value: money(CASH_MATCH_AMOUNT) },
+    { label: "Method", value: "Cash" },
+    { label: "Status", value: "Processing" },
+    { label: "Reported", value: "Just now" },
+  ],
+});
+
+const buildCashMatchedActivity = (): ActivityItem => ({
+  id: `cash-matched-${Date.now()}`,
+  text: (<>Cash payment matched to <b className="font-medium text-ink">{CASH_MATCH_INVOICE}</b> for {CASH_MATCH_CLIENT}</>),
+  time: "Just now",
+  tone: "green",
+  icon: GitMerge,
+  title: "Match found",
+  summary: `Matched your cash payment to ${CASH_MATCH_INVOICE} for ${CASH_MATCH_CLIENT}. Review and approve the findings.`,
+  sourceDetected: true,
+  source: "wipOS agent",
+  client: CASH_MATCH_CLIENT,
+  invoiceId: CASH_MATCH_INVOICE,
+  details: [
+    { label: "Invoice", value: CASH_MATCH_INVOICE },
+    { label: "Client", value: CASH_MATCH_CLIENT },
+    { label: "Amount", value: money(CASH_MATCH_AMOUNT) },
+    { label: "Matched", value: "Just now" },
+  ],
+});
+
+interface CashMatchFindings {
+  client: string;
+  invoiceId: string;
+  amount: number;
+  description: string;
+  sources: { label: string; value: string }[];
+}
+
+const PipelineCtx = React.createContext<PipelineColumnData[]>(INITIAL_PIPELINE);
+const ActivityCtx = React.createContext<ActivityItem[]>(INITIAL_ACTIVITY);
+const AddEarningCtx = React.createContext<{ open: () => void; claimed: boolean }>({ open: () => {}, claimed: false });
+
+const usePipeline = () => React.useContext(PipelineCtx);
+const useActivities = () => React.useContext(ActivityCtx);
+const useAddEarning = () => React.useContext(AddEarningCtx);
+
+const CommandPaletteCtx = React.createContext<{ open: boolean; setOpen: (open: boolean) => void }>({
+  open: false,
+  setOpen: () => {},
+});
+const useCommandPalette = () => React.useContext(CommandPaletteCtx);
+
+const useCommandShortcut = (setOpen: (open: boolean) => void) => {
+  React.useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() !== "k" || !(event.metaKey || event.ctrlKey)) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, [contenteditable='true']")) return;
+      event.preventDefault();
+      setOpen(true);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [setOpen]);
+};
 
 const FREELANCER = {
   name: "Jordan Ellis",
@@ -357,6 +702,7 @@ const STATUS_TONE: Record<PaymentStatus, Tone> = {
   expected: "purple",
   overdue: "red",
   paid: "green",
+  processing: "slate",
 };
 
 const STATUS_LABEL: Record<PaymentStatus, string> = {
@@ -364,6 +710,7 @@ const STATUS_LABEL: Record<PaymentStatus, string> = {
   expected: "Expected",
   overdue: "Overdue",
   paid: "Paid",
+  processing: "Processing",
 };
 
 interface InvoiceLine {
@@ -378,7 +725,7 @@ interface Invoice {
   id: string;
   client: string;
   clientEmail: string;
-  status: PaymentStatus;
+  status: InvoiceStatus;
   issued: string;
   dueDate: string;
   dueLabel: string;
@@ -390,7 +737,7 @@ interface Invoice {
   note: string;
 }
 
-const INVOICES: Record<string, Invoice> = {
+const INITIAL_INVOICES: Record<string, Invoice> = {
   "INV-1048": {
     id: "INV-1048",
     client: "Northstar Labs",
@@ -476,6 +823,24 @@ const INVOICES: Record<string, Invoice> = {
     ],
     note: "Paid in full · Bank transfer",
   },
+  "INV-1042": {
+    id: "INV-1042",
+    client: "Atlas Creative",
+    clientEmail: "hello@atlascreative.co",
+    status: "paid",
+    issued: "May 30, 2026",
+    dueDate: "Jun 13, 2026",
+    dueLabel: "Paid 4 days ago",
+    paidDate: "Jun 13, 2026",
+    amount: 2800,
+    paymentMethod: "Wise",
+    terms: "Net 14",
+    lines: [
+      { desc: "Brand guidelines — final delivery", qty: 1, unit: "project", rate: 2200, amount: 2200 },
+      { desc: "Presentation deck design", qty: 4, unit: "hrs", rate: 150, amount: 600 },
+    ],
+    note: "Paid in full · Wise",
+  },
   "INV-1033": {
     id: "INV-1033",
     client: "Northstar Labs",
@@ -530,25 +895,29 @@ const INVOICES: Record<string, Invoice> = {
   },
 };
 
-const STATUS_ORDER: Record<PaymentStatus, number> = { overdue: 0, due: 1, expected: 2, paid: 3 };
+const STATUS_ORDER: Record<InvoiceStatus, number> = { overdue: 0, due: 1, expected: 2, paid: 3 };
 
-const INVOICE_LIST = Object.values(INVOICES).sort(
-  (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || b.amount - a.amount
-);
+const sortInvoiceList = (invoices: Record<string, Invoice>): Invoice[] =>
+  Object.values(invoices).sort(
+    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || b.amount - a.amount
+  );
 
-const clientInvoices = (name: string): Invoice[] =>
-  Object.values(INVOICES).filter((inv) => inv.client === name);
+const clientInvoices = (invoices: Record<string, Invoice>, name: string): Invoice[] =>
+  Object.values(invoices).filter((inv) => inv.client === name);
 
-const clientInvoiceSubtitle = (name: string): string => {
-  const invoices = clientInvoices(name);
-  if (invoices.length === 1) return invoices[0].id;
-  return `${invoices.length} invoices`;
+const clientInvoiceSubtitle = (invoices: Record<string, Invoice>, name: string): string => {
+  const list = clientInvoices(invoices, name);
+  if (list.length === 1) return list[0].id;
+  return `${list.length} invoices`;
 };
 
-const clientOverdueTotal = (name: string): number =>
-  clientInvoices(name)
+const clientOverdueTotal = (invoices: Record<string, Invoice>, name: string): number =>
+  clientInvoices(invoices, name)
     .filter((inv) => inv.status === "overdue")
     .reduce((s, inv) => s + inv.amount, 0);
+
+const InvoicesCtx = React.createContext<Record<string, Invoice>>(INITIAL_INVOICES);
+const useInvoices = () => React.useContext(InvoicesCtx);
 
 const InvoiceCtx = React.createContext<(id: string) => void>(() => {});
 const useOpenInvoice = () => React.useContext(InvoiceCtx);
@@ -643,7 +1012,7 @@ interface ReminderTarget {
   invoice: string;
   amount: number;
   statusLabel: string;
-  status: PaymentStatus;
+  status: InvoiceStatus;
 }
 
 const buildMessage = (t: ReminderTarget, voice: string): string => {
@@ -729,8 +1098,8 @@ const ReminderMessageBody: React.FC<{
   );
 };
 
-const buildStoredReminder = (invoiceId: string): SentReminder | undefined => {
-  const invoice = INVOICES[invoiceId];
+const buildStoredReminder = (invoiceId: string, invoices: Record<string, Invoice>): SentReminder | undefined => {
+  const invoice = invoices[invoiceId];
   const stored = INVOICE_REMINDERS[invoiceId];
   if (!invoice || !stored) return undefined;
   const target: ReminderTarget = {
@@ -771,6 +1140,42 @@ const INPUT_FOCUS = "outline-none transition focus-visible:border-line-strong fo
 
 const Card: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className = "", children }) => (
   <div className={`rounded-2xl border border-card-border bg-card ${className}`}>{children}</div>
+);
+
+const TableSearchEmpty: React.FC<{ message: string }> = ({ message }) => (
+  <div className="flex flex-col items-center px-6 py-10 text-center">
+    <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${ICON_WELL}`}>
+      <SearchX size={20} strokeWidth={1.75} className="text-muted" aria-hidden="true" />
+    </div>
+    <p className="mt-3 max-w-[300px] text-[13px] leading-relaxed text-muted">{message}</p>
+  </div>
+);
+
+const TableSearchField: React.FC<{
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}> = ({ value, onChange, placeholder }) => (
+  <div className="relative min-w-0 flex-1 sm:max-w-sm">
+    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-faint" />
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`w-full rounded-xl border border-line-strong bg-card py-2 pl-9 pr-9 text-[13px] text-ink ${INPUT_FOCUS}`}
+    />
+    {value && (
+      <button
+        type="button"
+        onClick={() => onChange("")}
+        aria-label="Clear search"
+        className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-muted transition hover:bg-hover hover:text-ink"
+      >
+        <CircleX size={15} strokeWidth={1.75} />
+      </button>
+    )}
+  </div>
 );
 
 const SectionTitle: React.FC<{ title: string; subtitle?: string; right?: React.ReactNode }> = ({ title, subtitle, right }) => (
@@ -842,6 +1247,21 @@ const NavUser: React.FC = () => (
   </SidebarMenu>
 );
 
+const SidebarSearch: React.FC = () => {
+  const { setOpen } = useCommandPalette();
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton tooltip="Search" onClick={() => setOpen(true)}>
+        <Search />
+        <span data-sidebar-label className="truncate group-data-[collapsible=icon]:hidden">
+          Search
+        </span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+};
+
 const AppSidebar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { toggleSidebar } = useSidebar();
@@ -867,6 +1287,7 @@ const AppSidebar: React.FC = () => {
       <SidebarGroup className="p-0">
         <SidebarGroupContent>
           <SidebarMenu>
+            <SidebarSearch />
             {SIDEBAR_NAV.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton isActive={"active" in item && item.active} tooltip={item.label}>
@@ -913,7 +1334,9 @@ const AppSidebar: React.FC = () => {
 
 /* ---------------------------- header ---------------------------- */
 
-const Header: React.FC = () => (
+const Header: React.FC = () => {
+  const { open, claimed } = useAddEarning();
+  return (
   <header className="sticky top-0 z-30 bg-canvas/80 backdrop-blur-xl">
     <div className="flex flex-col gap-4 px-4 pb-4 pt-5 md:px-6 lg:flex-row lg:items-center lg:justify-between">
       <div>
@@ -925,13 +1348,18 @@ const Header: React.FC = () => (
         <button className="inline-flex items-center gap-2 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover">
           <Download size={15} /> Export report
         </button>
-        <button className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg shadow-lift transition hover:opacity-90">
-          <Plus size={15} /> Create invoice
+        <button
+          onClick={open}
+          disabled={claimed}
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg shadow-lift transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Plus size={15} /> Add earning
         </button>
       </div>
     </div>
   </header>
-);
+  );
+};
 
 /* ---------------------------- KPI card ---------------------------- */
 
@@ -986,9 +1414,10 @@ const LegendDot: React.FC<{ tone: Tone; label: string }> = ({ tone, label }) => 
 
 const EarningsChart: React.FC = () => {
   const { theme } = useTheme();
+  const { chart } = useEarningsStats();
   const [range, setRange] = React.useState<ChartRange>(6);
-  const data = chartSlice(range);
-  const insight = buildOnTrackInsight(range);
+  const data = chartSlice(chart, range);
+  const insight = buildOnTrackInsight(chart, range);
   const gridStroke = theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
   const tickFill = theme === "dark" ? "#636366" : "#86868b";
 
@@ -1111,12 +1540,33 @@ const PaymentItemRow: React.FC<{ item: Payment }> = ({ item }) => {
   const openReminder = useOpenReminder();
   const sentReminders = useSentReminders();
   const tone = STATUS_TONE[item.status];
-  const canRemind = item.status === "due" || item.status === "overdue" || item.status === "expected";
+  const isProcessing = item.status === "processing";
+  const canRemind = !isProcessing && (item.status === "due" || item.status === "overdue" || item.status === "expected");
   const reminderSent = hasReminderSent(item.invoice, sentReminders);
-  const reminderTarget = { client: item.client, invoice: item.invoice, amount: item.amount, statusLabel: item.due, status: item.status };
+  const reminderTarget = { client: item.client, invoice: item.invoice, amount: item.amount, statusLabel: item.due, status: item.status as InvoiceStatus };
   const btnBase = "inline-flex w-fit items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium transition";
   const btnNeutral = `${btnBase} border border-line-strong bg-card text-ink hover:bg-hover`;
   const btnPrimary = `${btnBase} bg-primary text-primary-fg hover:opacity-90`;
+
+  if (isProcessing) {
+    return (
+      <div className="rounded-xl border border-dashed border-line-strong bg-well-muted p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="truncate text-[13.5px] font-semibold text-ink">{item.client}</div>
+            <div className="mt-0.5 text-[12px] text-faint">Cash payment</div>
+            <div className={`mt-0.5 text-[12px] font-medium ${TONE[tone].text}`}>{item.due}</div>
+          </div>
+          <div className="text-right text-[14px] font-semibold text-ink tnum">{money(item.amount)}</div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 text-[12px] text-muted">
+          <Loader2 size={14} className="shrink-0 animate-spin" />
+          Matching invoice, client &amp; messages…
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-card-border bg-card p-3 transition hover:border-line-strong">
       <div className="flex items-start justify-between gap-2">
@@ -1148,7 +1598,7 @@ const PaymentItemRow: React.FC<{ item: Payment }> = ({ item }) => {
   );
 };
 
-const PipelineColumn: React.FC<{ column: (typeof PIPELINE)[number] }> = ({ column }) => {
+const PipelineColumn: React.FC<{ column: PipelineColumnData }> = ({ column }) => {
   const total = column.items.reduce((s, i) => s + i.amount, 0);
   return (
     <Card className="flex flex-col p-4">
@@ -1162,7 +1612,7 @@ const PipelineColumn: React.FC<{ column: (typeof PIPELINE)[number] }> = ({ colum
       </div>
       <div className="space-y-2.5">
         {column.items.map((item) => (
-          <PaymentItemRow key={item.invoice + item.due} item={item} />
+          <PaymentItemRow key={item.id} item={item} />
         ))}
       </div>
     </Card>
@@ -1272,31 +1722,156 @@ const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
   );
 };
 
-const InvoicesList: React.FC = () => (
+type InvoiceSortKey = "invoice" | "amount" | "due" | "status";
+type SortDir = "asc" | "desc";
+type InvoiceStatusFilter = InvoiceStatus | "all";
+
+const INVOICE_STATUS_FILTERS: { key: InvoiceStatusFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "overdue", label: "Overdue" },
+  { key: "due", label: "Due soon" },
+  { key: "expected", label: "Expected" },
+  { key: "paid", label: "Paid" },
+];
+
+const invoiceSortValue = (invoice: Invoice, key: InvoiceSortKey): number | string => {
+  if (key === "invoice") return invoice.id;
+  if (key === "amount") return invoice.amount;
+  if (key === "due") return new Date(invoice.dueDate).getTime();
+  return STATUS_ORDER[invoice.status];
+};
+
+const SortableTh = <K extends string>({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onSort,
+  align = "left",
+  className = "",
+}: {
+  label: string;
+  sortKey: K;
+  activeKey: K;
+  dir: SortDir;
+  onSort: (key: K) => void;
+  align?: "left" | "right";
+  className?: string;
+}) => {
+  const active = sortKey === activeKey;
+  return (
+    <th className={`px-4 pb-2 pt-4 font-medium ${align === "right" ? "text-right" : "text-left"} ${className}`}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1 uppercase tracking-wide transition ${
+          active ? "text-ink" : "text-faint hover:text-muted"
+        } ${align === "right" ? "ml-auto" : ""}`}
+      >
+        {label}
+        {active ? (
+          dir === "asc" ? <ArrowUp size={12} className="shrink-0" /> : <ArrowDown size={12} className="shrink-0" />
+        ) : null}
+      </button>
+    </th>
+  );
+};
+
+const InvoicesList: React.FC = () => {
+  const invoices = useInvoices();
+  const [query, setQuery] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<InvoiceStatusFilter>("all");
+  const [sortKey, setSortKey] = React.useState<InvoiceSortKey>("status");
+  const [sortDir, setSortDir] = React.useState<SortDir>("asc");
+
+  const toggleSort = (key: InvoiceSortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir(key === "amount" || key === "due" ? "desc" : "asc");
+    }
+  };
+
+  const rows = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = sortInvoiceList(invoices).filter((invoice) => {
+      if (statusFilter !== "all" && invoice.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        invoice.id.toLowerCase().includes(q) ||
+        invoice.client.toLowerCase().includes(q) ||
+        invoice.clientEmail.toLowerCase().includes(q)
+      );
+    });
+
+    return [...filtered].sort((a, b) => {
+      const av = invoiceSortValue(a, sortKey);
+      const bv = invoiceSortValue(b, sortKey);
+      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [invoices, query, sortDir, sortKey, statusFilter]);
+
+  return (
   <Card className="overflow-hidden">
+    <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <TableSearchField
+        value={query}
+        onChange={setQuery}
+        placeholder="Search invoices or clients…"
+      />
+      <div className="inline-flex shrink-0 flex-wrap rounded-xl border border-line bg-well-muted p-0.5">
+        {INVOICE_STATUS_FILTERS.map((filter) => (
+          <button
+            key={filter.key}
+            type="button"
+            onClick={() => setStatusFilter(filter.key)}
+            className={`rounded-[10px] px-2.5 py-1.5 text-[12px] font-medium transition whitespace-nowrap ${
+              statusFilter === filter.key ? TAB_SELECTED : "text-muted hover:text-ink"
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+    </div>
     <div className="overflow-x-auto">
       <table className="w-full min-w-[1040px]">
         <thead>
-          <tr className="text-[11.5px] font-medium uppercase tracking-wide text-faint">
-            <th className="pb-2 pt-4 pl-5 pr-4 text-left font-medium">Invoice</th>
-            <th className="px-4 pb-2 pt-4 text-right font-medium">Amount</th>
-            <th className="px-4 pb-2 pt-4 text-left font-medium">Due</th>
-            <th className="px-4 pb-2 pt-4 text-left font-medium">Status</th>
-            <th className="px-4 pb-2 pt-4 text-left font-medium">Terms</th>
-            <th className="px-4 pb-2 pt-4 text-left font-medium">Payment method</th>
-            <th className="px-4 pb-2 pt-4 text-left font-medium">Last reminder</th>
+          <tr className="text-[11.5px]">
+            <SortableTh
+              label="Invoice"
+              sortKey="invoice"
+              activeKey={sortKey}
+              dir={sortDir}
+              onSort={toggleSort}
+              className="pl-5 pr-4"
+            />
+            <SortableTh label="Amount" sortKey="amount" activeKey={sortKey} dir={sortDir} onSort={toggleSort} align="right" />
+            <SortableTh label="Due" sortKey="due" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <SortableTh label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+            <th className="px-4 pb-2 pt-4 text-left text-[11.5px] font-medium uppercase tracking-wide text-faint">Terms</th>
+            <th className="px-4 pb-2 pt-4 text-left text-[11.5px] font-medium uppercase tracking-wide text-faint">Payment method</th>
+            <th className="px-4 pb-2 pt-4 text-left text-[11.5px] font-medium uppercase tracking-wide text-faint">Last reminder</th>
             <th className="pb-2 pt-4 pl-4 pr-5" aria-hidden="true" />
           </tr>
         </thead>
         <tbody>
-          {INVOICE_LIST.map((invoice) => (
-            <InvoiceRow key={invoice.id} invoice={invoice} />
-          ))}
+          {rows.length > 0 ? (
+            rows.map((invoice) => <InvoiceRow key={invoice.id} invoice={invoice} />)
+          ) : (
+            <tr>
+              <td colSpan={8}>
+                <TableSearchEmpty message="No invoices match your search or filters." />
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
   </Card>
-);
+  );
+};
 
 type PipelineView = "cards" | "list";
 
@@ -1307,6 +1882,7 @@ const PIPELINE_VIEWS: { key: PipelineView; label: string; icon: React.ComponentT
 
 const PaymentPipelineSection: React.FC = () => {
   const [view, setView] = React.useState<PipelineView>("cards");
+  const pipeline = usePipeline();
 
   return (
     <section>
@@ -1330,8 +1906,14 @@ const PaymentPipelineSection: React.FC = () => {
         }
       />
       {view === "cards" ? (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {PIPELINE.map((col) => (
+        <div
+          className={`grid grid-cols-1 gap-4 md:grid-cols-2 ${
+            pipeline.some((col) => col.key === "processing" && col.items.length > 0) ? "xl:grid-cols-5" : "xl:grid-cols-4"
+          }`}
+        >
+          {pipeline
+            .filter((col) => col.key !== "processing" || col.items.length > 0)
+            .map((col) => (
             <PipelineColumn key={col.key} column={col} />
           ))}
         </div>
@@ -1383,22 +1965,163 @@ const NeedsAttention: React.FC = () => (
 
 /* ---------------------------- recent activity ---------------------------- */
 
-const RecentActivity: React.FC = () => (
-  <Card className="flex h-full w-full flex-col p-5 md:p-6">
-    <SectionTitle title="Recent activity" />
-    <ol className="relative ml-1 space-y-4 border-l border-line pl-5">
-      {ACTIVITY.map((a, i) => (
-        <li key={i} className="relative">
-          <span className={`absolute -left-[30px] flex h-5 w-5 items-center justify-center rounded-full ${TONE[a.tone].bg} ${TONE[a.tone].text}`}>
-            <a.icon size={11} />
-          </span>
-          <p className="text-[13px] leading-snug text-muted">{a.text}</p>
-          <p className="mt-0.5 text-[11.5px] text-faint">{a.time}</p>
-        </li>
-      ))}
-    </ol>
-  </Card>
+const ActivityRow: React.FC<{ item: ActivityItem; isLast: boolean; onSelect: () => void }> = ({ item, isLast, onSelect }) => (
+  <li className="flex gap-5">
+    <div className="flex w-5 shrink-0 flex-col items-center pt-1.5" aria-hidden="true">
+      <span className={`flex h-5 w-5 items-center justify-center rounded-full ${TONE[item.tone].bg} ${TONE[item.tone].text}`}>
+        <item.icon size={11} />
+      </span>
+      {!isLast && <div className="my-2 w-px min-h-[14px] flex-1 bg-line" />}
+    </div>
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`group -mr-1 flex-1 rounded-xl px-2.5 py-1.5 text-left transition hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isLast ? "" : "pb-5"}`}
+    >
+      <p className="text-[13px] leading-snug text-muted transition-colors group-hover:text-ink">{item.text}</p>
+      <p className="mt-1 text-[11.5px] text-faint">{item.time}</p>
+    </button>
+  </li>
 );
+
+const ActivityMessagePreviewBlock: React.FC<{ preview: ActivityMessagePreview }> = ({ preview }) => (
+  <div className="overflow-hidden rounded-xl border border-line bg-well-muted">
+    <div className="border-b border-line px-4 py-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <span className="truncate text-[12.5px] font-medium text-ink">{preview.author}</span>
+        <span className="shrink-0 text-[11.5px] text-faint">{preview.channel}</span>
+      </div>
+      {preview.context && (
+        <div className="mt-0.5 truncate text-[12px] text-muted">{preview.context}</div>
+      )}
+    </div>
+    <div className="whitespace-pre-wrap px-4 py-3.5 text-[13.5px] leading-relaxed text-ink">{preview.body}</div>
+  </div>
+);
+
+const ActivityDetailModal: React.FC<{ item: ActivityItem; onClose: () => void }> = ({ item, onClose }) => {
+  const openInvoice = useOpenInvoice();
+  const [reported, setReported] = useState(false);
+
+  const tone = TONE[item.tone];
+
+  return (
+    <ModalFrame onClose={onClose} ariaLabel={item.title} dialogClassName="max-w-[600px]">
+      {(dismiss) => (
+        <>
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone.bg} ${tone.text}`}>
+              <item.icon size={16} />
+            </span>
+            <div className="min-w-0 pr-2">
+              <p className="text-[15px] leading-snug text-muted [&_b]:font-semibold [&_b]:text-ink">{item.text}</p>
+              <div className="mt-1 text-[12px] text-faint">{item.time}</div>
+            </div>
+          </div>
+          <button
+            onClick={() => dismiss()}
+            aria-label="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
+          >
+            <X size={17} />
+          </button>
+        </div>
+
+        <div className="modal-scroll flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          {item.sourceDetected && item.source && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] text-muted">
+              <Waypoints size={13} className="text-faint" />
+              Detected via {item.source}
+            </div>
+          )}
+          <p className="text-[13.5px] leading-relaxed text-muted">{item.summary}</p>
+          {item.messagePreview && (
+            <div>
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-faint">Message preview</div>
+              <ActivityMessagePreviewBlock preview={item.messagePreview} />
+            </div>
+          )}
+          <dl className="divide-y divide-line rounded-2xl border border-line">
+            {item.details.map((row) => (
+              <div key={row.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+                <dt className="text-[12px] text-faint">{row.label}</dt>
+                <dd className="text-right text-[13px] font-medium text-ink">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-line px-6 py-4">
+          {item.sourceDetected ? (
+            reported ? (
+              <p className="text-[12.5px] text-muted">Thanks — we&apos;ll review this.</p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setReported(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-muted transition hover:bg-hover hover:text-ink"
+              >
+                <Flag size={14} />
+                Report a mistake
+              </button>
+            )
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-2">
+            {item.invoiceId && (
+              <button
+                type="button"
+                onClick={() => {
+                  openInvoice(item.invoiceId!);
+                  dismiss({ instant: true });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover"
+              >
+                View invoice
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => dismiss()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+        </>
+      )}
+    </ModalFrame>
+  );
+};
+
+const RecentActivity: React.FC = () => {
+  const [selected, setSelected] = useState<ActivityItem | null>(null);
+  const activities = useActivities();
+
+  return (
+    <>
+      <Card className="flex h-full w-full flex-col p-5 md:p-6">
+        <SectionTitle
+          title="Recent activity"
+          right={
+            <button className="hidden w-fit items-center gap-1.5 rounded-lg border border-line-strong bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink transition hover:bg-hover sm:inline-flex">
+              See all
+            </button>
+          }
+        />
+        <ol className="mt-1">
+          {activities.map((a, i) => (
+            <ActivityRow key={a.id} item={a} isLast={i === activities.length - 1} onSelect={() => setSelected(a)} />
+          ))}
+        </ol>
+      </Card>
+      {selected && <ActivityDetailModal item={selected} onClose={() => setSelected(null)} />}
+    </>
+  );
+};
 
 /* ---------------------------- top clients ---------------------------- */
 
@@ -1446,13 +2169,14 @@ const ClientNoteField: React.FC<{ client: string }> = ({ client }) => {
 };
 
 const ClientRow: React.FC<{ client: Client }> = ({ client }) => {
-  const overdue = clientOverdueTotal(client.name);
+  const invoices = useInvoices();
+  const overdue = clientOverdueTotal(invoices, client.name);
   return (
   <tr className="border-t border-line transition hover:bg-hover">
     <td className="py-3.5 pl-5 pr-4">
       <div className="min-w-0">
         <div className="text-[13.5px] font-medium text-ink">{client.name}</div>
-        <div className="mt-0.5 truncate text-[12px] text-faint">{clientInvoiceSubtitle(client.name)}</div>
+        <div className="mt-0.5 truncate text-[12px] text-faint">{clientInvoiceSubtitle(invoices, client.name)}</div>
       </div>
     </td>
     <td className="px-4 py-3.5 text-right text-[13.5px] font-medium text-ink tnum">{money(client.revenue)}</td>
@@ -1473,7 +2197,69 @@ const ClientRow: React.FC<{ client: Client }> = ({ client }) => {
   );
 };
 
-const TopClientsSection: React.FC = () => (
+type ClientSortKey = "client" | "revenue" | "overdue" | "avgDays" | "reliability";
+
+const RELIABILITY_ORDER: Record<Reliability, number> = {
+  Reliable: 0,
+  "Usually late": 1,
+  "At risk": 2,
+  "New client": 3,
+};
+
+const CLIENT_RELIABILITY_FILTERS: { key: Reliability | "all"; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "Reliable", label: "Reliable" },
+  { key: "Usually late", label: "Usually late" },
+  { key: "At risk", label: "At risk" },
+  { key: "New client", label: "New client" },
+];
+
+const clientSortValue = (invoices: Record<string, Invoice>, client: Client, key: ClientSortKey): number | string => {
+  if (key === "client") return client.name;
+  if (key === "revenue") return client.revenue;
+  if (key === "overdue") return clientOverdueTotal(invoices, client.name);
+  if (key === "avgDays") return client.avgDays;
+  return RELIABILITY_ORDER[client.reliability];
+};
+
+const TopClientsSection: React.FC = () => {
+  const invoices = useInvoices();
+  const { notes } = useClientNotes();
+  const [query, setQuery] = React.useState("");
+  const [reliabilityFilter, setReliabilityFilter] = React.useState<Reliability | "all">("all");
+  const [sortKey, setSortKey] = React.useState<ClientSortKey>("revenue");
+  const [sortDir, setSortDir] = React.useState<SortDir>("desc");
+
+  const toggleSort = (key: ClientSortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir(key === "client" || key === "reliability" ? "asc" : "desc");
+    }
+  };
+
+  const rows = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = CLIENTS.filter((client) => {
+      if (reliabilityFilter !== "all" && client.reliability !== reliabilityFilter) return false;
+      if (!q) return true;
+      const note = notes[client.name] ?? INITIAL_CLIENT_NOTES[client.name] ?? "";
+      return (
+        client.name.toLowerCase().includes(q) ||
+        client.insight.toLowerCase().includes(q) ||
+        note.toLowerCase().includes(q)
+      );
+    });
+
+    return [...filtered].sort((a, b) => {
+      const av = clientSortValue(invoices, a, sortKey);
+      const bv = clientSortValue(invoices, b, sortKey);
+      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [invoices, notes, query, reliabilityFilter, sortDir, sortKey]);
+
+  return (
   <section>
     <SectionTitle
       title="Top clients"
@@ -1485,44 +2271,185 @@ const TopClientsSection: React.FC = () => (
       }
     />
     <Card className="overflow-hidden">
+      <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <TableSearchField
+          value={query}
+          onChange={setQuery}
+          placeholder="Search clients, insights, or notes…"
+        />
+        <div className="inline-flex shrink-0 flex-wrap rounded-xl border border-line bg-well-muted p-0.5">
+          {CLIENT_RELIABILITY_FILTERS.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              onClick={() => setReliabilityFilter(filter.key)}
+              className={`rounded-[10px] px-2.5 py-1.5 text-[12px] font-medium transition whitespace-nowrap ${
+                reliabilityFilter === filter.key ? TAB_SELECTED : "text-muted hover:text-ink"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1080px]">
           <thead>
-            <tr className="text-[11.5px] font-medium uppercase tracking-wide text-faint">
-              <th className="pb-2 pt-4 pl-5 pr-4 text-left font-medium">Client</th>
-              <th className="px-4 pb-2 pt-4 text-right font-medium">Revenue this year</th>
-              <th className="px-4 pb-2 pt-4 text-right font-medium">Overdue invoices</th>
-              <th className="px-4 pb-2 pt-4 text-right font-medium">Avg. days to pay</th>
-              <th className="px-4 pb-2 pt-4 text-left font-medium">
+            <tr className="text-[11.5px]">
+              <SortableTh
+                label="Client"
+                sortKey="client"
+                activeKey={sortKey}
+                dir={sortDir}
+                onSort={toggleSort}
+                className="pl-5 pr-4"
+              />
+              <SortableTh
+                label="Revenue this year"
+                sortKey="revenue"
+                activeKey={sortKey}
+                dir={sortDir}
+                onSort={toggleSort}
+                align="right"
+              />
+              <SortableTh
+                label="Overdue invoices"
+                sortKey="overdue"
+                activeKey={sortKey}
+                dir={sortDir}
+                onSort={toggleSort}
+                align="right"
+              />
+              <SortableTh
+                label="Avg. days to pay"
+                sortKey="avgDays"
+                activeKey={sortKey}
+                dir={sortDir}
+                onSort={toggleSort}
+                align="right"
+              />
+              <th className="px-4 pb-2 pt-4 text-left text-[11.5px] font-medium uppercase tracking-wide text-faint">
                 <span className="inline-flex items-center gap-1.5">
                   Insights
                   <Sparkle size={12} className="text-faint" />
                 </span>
               </th>
-              <th className="px-4 pb-2 pt-4 text-right font-medium">Reliability</th>
-              <th className="pb-2 pt-4 pl-4 pr-5 text-left font-medium">Notes</th>
+              <SortableTh
+                label="Reliability"
+                sortKey="reliability"
+                activeKey={sortKey}
+                dir={sortDir}
+                onSort={toggleSort}
+                align="right"
+              />
+              <th className="pb-2 pt-4 pl-4 pr-5 text-left text-[11.5px] font-medium uppercase tracking-wide text-faint">Notes</th>
             </tr>
           </thead>
           <tbody>
-            {CLIENTS.map((c) => (
-              <ClientRow key={c.name} client={c} />
-            ))}
+            {rows.length > 0 ? (
+              rows.map((c) => <ClientRow key={c.name} client={c} />)
+            ) : (
+              <tr>
+                <td colSpan={7}>
+                  <TableSearchEmpty message="No clients match your search or filters." />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
     </Card>
   </section>
-);
+  );
+};
 
 /* ---------------------------- modal shell ---------------------------- */
 
-const useModalShell = (onClose: () => void) => {
+type ModalStackApi = {
+  count: number;
+  register: () => () => void;
+  beginOverlayExit: () => void;
+};
+
+type OverlayPhase = "hidden" | "enter" | "visible" | "exit";
+
+type ModalDismissOptions = { instant?: boolean };
+type ModalDismiss = (options?: ModalDismissOptions) => void;
+
+const ModalStackCtx = React.createContext<ModalStackApi>({
+  count: 0,
+  register: () => () => {},
+  beginOverlayExit: () => {},
+});
+
+const ModalDismissCtx = React.createContext<ModalDismiss>(() => {});
+
+const OVERLAY_MS = 150;
+const DIALOG_MS = 180;
+const MODAL_SHELL = "fixed inset-0 z-[51] flex items-end justify-center sm:items-center sm:p-4";
+const MODAL_SHELL_TOP = "fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4";
+const DIALOG_BASE = "flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-card shadow-lift sm:rounded-3xl";
+const DIALOG_IN = "animate-[dialogIn_180ms_ease-out]";
+const DIALOG_OUT = "animate-[dialogOut_180ms_ease-in_forwards]";
+
+const ModalStackProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const [count, setCount] = React.useState(0);
+  const [phase, setPhase] = React.useState<OverlayPhase>("hidden");
+  const prevCount = React.useRef(0);
+  const hideTimer = React.useRef<number | null>(null);
+
+  const register = React.useCallback(() => {
+    setCount((c) => c + 1);
+    return () => setCount((c) => c - 1);
+  }, []);
+
+  const beginOverlayExit = React.useCallback(() => {
+    setPhase("exit");
+  }, []);
+
   React.useEffect(() => {
+    const prev = prevCount.current;
+    prevCount.current = count;
+
+    if (count > 0 && prev === 0) {
+      setPhase("enter");
+    } else if (count === 0 && prev > 0) {
+      const alreadyExiting = phase === "exit";
+      if (!alreadyExiting) setPhase("exit");
+      if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+      hideTimer.current = window.setTimeout(() => setPhase("hidden"), alreadyExiting ? 0 : OVERLAY_MS);
+    }
+  }, [count, phase]);
+
+  React.useEffect(() => {
+    if (phase !== "enter") return;
+    const t = window.setTimeout(() => setPhase("visible"), OVERLAY_MS);
+    return () => window.clearTimeout(t);
+  }, [phase]);
+
+  React.useEffect(
+    () => () => {
+      if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    },
+    []
+  );
+
+  const showOverlay = phase !== "hidden";
+  const overlayAnim =
+    phase === "enter" ? "animate-[overlayIn_150ms_ease-out]" : phase === "exit" ? "animate-[overlayOut_150ms_ease-in_forwards]" : "";
+
+  React.useEffect(() => {
+    if (count === 0) return;
+
     const lockedY = window.scrollY;
     const scrollRoot = document.documentElement;
 
     const inModalScroll = (target: EventTarget | null) =>
       target instanceof Element && !!target.closest('[role="dialog"] .modal-scroll');
+
+    const inTextEntry = (target: EventTarget | null) =>
+      target instanceof Element &&
+      !!target.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]');
 
     const onScroll = () => {
       if (window.scrollY !== lockedY) window.scrollTo(0, lockedY);
@@ -1544,7 +2471,7 @@ const useModalShell = (onClose: () => void) => {
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (inTextEntry(e.target)) return;
       const scrollKeys = [" ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown"];
       if (scrollKeys.includes(e.key) && !inModalScroll(e.target)) e.preventDefault();
     };
@@ -1563,38 +2490,108 @@ const useModalShell = (onClose: () => void) => {
       document.removeEventListener("keydown", onKeyDown);
       window.scrollTo(0, lockedY);
     };
-  }, [onClose]);
+  }, [count > 0]);
+
+  return (
+    <ModalStackCtx.Provider value={{ count, register, beginOverlayExit }}>
+      {children}
+      {showOverlay &&
+        createPortal(
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none fixed inset-0 z-50 bg-black/30 backdrop-blur-sm ${overlayAnim}`}
+          />,
+          document.body
+        )}
+    </ModalStackCtx.Provider>
+  );
+};
+
+const useModalDismiss = () => React.useContext(ModalDismissCtx);
+
+const ModalFrame: React.FC<{
+  onClose: () => void;
+  shellClass?: string;
+  ariaLabel: string;
+  dialogClassName?: string;
+  children: React.ReactNode | ((dismiss: ModalDismiss) => React.ReactNode);
+}> = ({ onClose, shellClass = MODAL_SHELL, ariaLabel, dialogClassName = "", children }) => {
+  const { count, register, beginOverlayExit } = React.useContext(ModalStackCtx);
+  const [closing, setClosing] = React.useState(false);
+  const closeTimer = React.useRef<number | null>(null);
+
+  React.useEffect(() => register(), [register]);
+
+  React.useEffect(
+    () => () => {
+      if (closeTimer.current != null) window.clearTimeout(closeTimer.current);
+    },
+    []
+  );
+
+  const dismiss = React.useCallback<ModalDismiss>(
+    (options) => {
+      if (closing) return;
+      if (options?.instant) {
+        onClose();
+        return;
+      }
+      if (count === 1) beginOverlayExit();
+      setClosing(true);
+      closeTimer.current = window.setTimeout(onClose, DIALOG_MS);
+    },
+    [beginOverlayExit, closing, count, onClose]
+  );
+
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [dismiss]);
+
+  const body = typeof children === "function" ? children(dismiss) : children;
+
+  return (
+    <ModalDismissCtx.Provider value={dismiss}>
+      <div onClick={() => dismiss()} className={shellClass}>
+        <div
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={ariaLabel}
+          className={`${DIALOG_BASE} ${closing ? DIALOG_OUT : DIALOG_IN} ${dialogClassName}`}
+        >
+          {body}
+        </div>
+      </div>
+    </ModalDismissCtx.Provider>
+  );
 };
 
 /* ---------------------------- invoice preview ---------------------------- */
 
 const InvoicePreview: React.FC<{ invoice: Invoice; onClose: () => void }> = ({ invoice, onClose }) => {
   const openReminder = useOpenReminder();
-  useModalShell(onClose);
 
   const tone = STATUS_TONE[invoice.status];
   const subtotal = invoice.lines.reduce((s, l) => s + l.amount, 0);
   const primaryLabel = invoice.status === "paid" ? "Download receipt" : "Send reminder";
-  const onPrimary =
-    primaryLabel === "Send reminder"
-      ? () => {
-          onClose();
-          openReminder({ client: invoice.client, invoice: invoice.id, amount: invoice.amount, statusLabel: invoice.dueLabel, status: invoice.status });
-        }
-      : undefined;
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm animate-[overlayIn_150ms_ease-out] sm:items-center sm:p-4"
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={"Invoice " + invoice.id}
-        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-3xl bg-card shadow-lift animate-[dialogIn_180ms_ease-out] sm:rounded-3xl"
-      >
+    <ModalFrame onClose={onClose} ariaLabel={"Invoice " + invoice.id} dialogClassName="max-w-[560px]">
+      {(dismiss) => {
+        const onPrimary =
+          primaryLabel === "Send reminder"
+            ? () => {
+                openReminder({ client: invoice.client, invoice: invoice.id, amount: invoice.amount, statusLabel: invoice.dueLabel, status: invoice.status });
+                dismiss({ instant: true });
+              }
+            : undefined;
+
+        return (
+        <>
         {/* header */}
         <div className="flex items-center justify-between border-b border-line px-6 py-4">
           <div className="flex items-center gap-3">
@@ -1608,9 +2605,9 @@ const InvoicePreview: React.FC<{ invoice: Invoice; onClose: () => void }> = ({ i
           </div>
           <div className="flex items-center gap-2.5">
             <StatusPill tone={tone} label={STATUS_LABEL[invoice.status]} dot={false} />
-            {invoice.status !== "overdue" && <StatusPill tone="slate" label="Viewed" dot={false} />}
+            {invoice.status !== "overdue" && invoice.status !== "paid" && <StatusPill tone="slate" label="Viewed" dot={false} />}
             <button
-              onClick={onClose}
+              onClick={() => dismiss()}
               aria-label="Close"
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
             >
@@ -1689,8 +2686,10 @@ const InvoicePreview: React.FC<{ invoice: Invoice; onClose: () => void }> = ({ i
             {invoice.status === "paid" ? <Download size={15} /> : <Send size={15} />} {primaryLabel}
           </button>
         </div>
-      </div>
-    </div>
+        </>
+        );
+      }}
+    </ModalFrame>
   );
 };
 
@@ -1732,6 +2731,12 @@ const ReminderModal: React.FC<{
   const [attachPdf, setAttachPdf] = useState<boolean>(initial?.attachPdf ?? true);
   const [copyMe, setCopyMe] = useState<boolean>(initial?.copyMe ?? false);
   const [sent, setSent] = useState<boolean>(!!startInReceipt);
+  const [sending, setSending] = useState(false);
+  const sendTimer = React.useRef<number | null>(null);
+
+  React.useEffect(() => () => {
+    if (sendTimer.current != null) window.clearTimeout(sendTimer.current);
+  }, []);
 
   const firstRun = React.useRef(true);
   React.useEffect(() => {
@@ -1741,8 +2746,6 @@ const ReminderModal: React.FC<{
     }
     setMessage(buildMessage(target, voice));
   }, [voice, target]);
-
-  useModalShell(onClose);
 
   const active = CHANNELS.find((c) => c.key === channel) as Channel;
   const isEmail = channel === "email";
@@ -1754,22 +2757,24 @@ const ReminderModal: React.FC<{
   }, []);
 
   const handleSend = () => {
-    onSent?.({ target, channel, voice, message, subject, includeLink, attachPdf, copyMe });
-    setSent(true);
+    if (sending) return;
+    setSending(true);
+    sendTimer.current = window.setTimeout(() => {
+      onSent?.({ target, channel, voice, message, subject, includeLink, attachPdf, copyMe });
+      setSent(true);
+      setSending(false);
+    }, 1500);
   };
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/30 backdrop-blur-sm animate-[overlayIn_150ms_ease-out] sm:items-center sm:p-4"
+    <ModalFrame
+      onClose={onClose}
+      shellClass={MODAL_SHELL_TOP}
+      ariaLabel={"Send reminder to " + target.client}
+      dialogClassName="max-w-[560px]"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={"Send reminder to " + target.client}
-        className="flex max-h-[92vh] w-full max-w-[560px] flex-col overflow-hidden rounded-t-3xl bg-card shadow-lift animate-[dialogIn_180ms_ease-out] sm:rounded-3xl"
-      >
+      {(dismiss) => (
+        <>
         {sent ? (
           <>
             {/* header */}
@@ -1786,7 +2791,7 @@ const ReminderModal: React.FC<{
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={() => dismiss()}
                 aria-label="Close"
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
               >
@@ -1849,7 +2854,7 @@ const ReminderModal: React.FC<{
                 <Send size={15} /> Send another reminder
               </button>
               <button
-                onClick={onClose}
+                onClick={() => dismiss()}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90"
               >
                 Done
@@ -1874,7 +2879,7 @@ const ReminderModal: React.FC<{
               <div className="flex items-center gap-2.5">
                 <StatusPill tone={tone} label={target.statusLabel} dot={false} />
                 <button
-                  onClick={onClose}
+                  onClick={() => dismiss()}
                   aria-label="Close"
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
                 >
@@ -1978,18 +2983,402 @@ const ReminderModal: React.FC<{
                 Delivered securely via wipOS
               </span>
               <div className="flex items-center gap-2">
-                <button onClick={onClose} className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover">
+                <button onClick={() => dismiss()} className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover">
                   Cancel
                 </button>
-                <button onClick={handleSend} className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90">
-                  <active.icon size={15} /> Send via {active.label}
+                <button
+                  onClick={handleSend}
+                  disabled={sending}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90 disabled:cursor-wait disabled:opacity-90"
+                >
+                  {sending ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <active.icon size={15} /> Send via {active.label}
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           </>
         )}
-      </div>
-    </div>
+        </>
+      )}
+    </ModalFrame>
+  );
+};
+
+/* ---------------------------- add earning ---------------------------- */
+
+const useTypingPrefill = (fullText: string, active: boolean, speed = 28, delay = 0) => {
+  const [text, setText] = useState("");
+  const [done, setDone] = useState(false);
+
+  React.useEffect(() => {
+    if (!active) {
+      setText("");
+      setDone(false);
+      return;
+    }
+    setText("");
+    setDone(false);
+    let i = 0;
+    let interval: number | null = null;
+    const start = window.setTimeout(() => {
+      interval = window.setInterval(() => {
+        i += 1;
+        setText(fullText.slice(0, i));
+        if (i >= fullText.length) {
+          if (interval != null) window.clearInterval(interval);
+          setDone(true);
+        }
+      }, speed);
+    }, delay);
+    return () => {
+      window.clearTimeout(start);
+      if (interval != null) window.clearInterval(interval);
+    };
+  }, [active, fullText, speed, delay]);
+
+  return { text, done };
+};
+
+const AddEarningModal: React.FC<{
+  onClose: () => void;
+  onProcess: (description: string, complete: (findings: CashMatchFindings) => void) => void;
+}> = ({ onClose, onProcess }) => {
+  const { text: typed, done: typingDone } = useTypingPrefill(ADD_EARNING_PREFILL, true, 28, 2000);
+  const [message, setMessage] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [attachment, setAttachment] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [findings, setFindings] = useState<CashMatchFindings | null>(null);
+  const fileRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (typingDone) setMessage(ADD_EARNING_PREFILL);
+  }, [typingDone]);
+
+  const displayText = typingDone ? message : typed;
+  const canSubmit = typingDone && message.trim().length > 0 && !submitting;
+  const matched = !!findings;
+
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    onProcess(message.trim(), (result) => {
+      setFindings(result);
+      setSubmitting(false);
+    });
+  };
+
+  return (
+    <ModalFrame onClose={onClose} ariaLabel={matched ? "Approve match findings" : "Add earning"} dialogClassName="max-w-[560px]">
+      {(dismiss) =>
+        matched && findings ? (
+          <>
+            <div className="flex items-center justify-between border-b border-line px-6 py-4">
+              <div className="flex items-center gap-3">
+                <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${TONE.green.bg} ${TONE.green.text}`}>
+                  <GitMerge size={16} />
+                </span>
+                <div>
+                  <div className="text-[15px] font-semibold tracking-tight text-ink">Match ready for approval</div>
+                  <div className="text-[12px] text-faint">
+                    {findings.client} · {findings.invoiceId}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => dismiss()}
+                aria-label="Close"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="modal-scroll flex-1 space-y-5 overflow-y-auto px-6 py-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-line bg-well-muted px-3 py-1 text-[12px] text-muted">
+                <Sparkle size={13} className="text-faint" />
+                Findings from invoices, clients &amp; messages
+              </div>
+              <p className="text-[13.5px] leading-relaxed text-muted">
+                wipOS matched your cash payment to <span className="font-medium text-ink">{findings.invoiceId}</span> for{" "}
+                <span className="font-medium text-ink">{findings.client}</span> ({money(findings.amount)}).
+              </p>
+              <div className="rounded-xl border border-line bg-well-muted px-3.5 py-3 text-[13px] leading-relaxed text-muted">
+                &ldquo;{findings.description}&rdquo;
+              </div>
+              <dl className="divide-y divide-line rounded-2xl border border-line">
+                {findings.sources.map((row) => (
+                  <div key={row.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+                    <dt className="text-[12px] text-faint">{row.label}</dt>
+                    <dd className="text-right text-[13px] font-medium text-ink">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-t border-line px-6 py-4">
+              <button
+                type="button"
+                onClick={() => dismiss()}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-muted transition hover:bg-hover hover:text-ink"
+              >
+                Not quite
+              </button>
+              <button
+                type="button"
+                onClick={() => dismiss()}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90"
+              >
+                <CheckCircle2 size={15} /> Approve match
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between border-b border-line px-6 py-4">
+              <div className="flex items-center gap-3">
+                <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${ICON_WELL}`}>
+                  <Sparkle size={16} />
+                </span>
+                <div>
+                  <div className="text-[15px] font-semibold tracking-tight text-ink">Add earning</div>
+                  <div className="text-[12px] text-faint">Describe what you received — wipOS will match it</div>
+                </div>
+              </div>
+              <button
+                onClick={() => dismiss()}
+                aria-label="Close"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-hover hover:text-ink"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="modal-scroll flex-1 space-y-4 overflow-y-auto px-6 py-5">
+              <div className="rounded-2xl border border-line bg-well-muted p-1">
+                <div className="rounded-[14px] border border-line bg-card">
+                  <textarea
+                    value={displayText}
+                    onChange={(e) => typingDone && setMessage(e.target.value)}
+                    rows={5}
+                    readOnly={!typingDone || submitting}
+                    placeholder="Tell wipOS what you received…"
+                    className={`w-full resize-none rounded-[14px] bg-transparent px-4 py-3.5 text-[14px] leading-relaxed text-ink outline-none placeholder:text-faint ${!typingDone ? "caret-transparent" : ""} ${INPUT_FOCUS}`}
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2">
+                    <div className="flex items-center gap-1">
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        className="hidden"
+                        disabled={submitting}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setAttachment(file.name);
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => fileRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium text-muted transition hover:bg-hover hover:text-ink disabled:opacity-40"
+                      >
+                        <Paperclip size={14} /> Attach
+                      </button>
+                      <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => setRecording((r) => !r)}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium transition disabled:opacity-40 ${
+                          recording ? "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400" : "text-muted hover:bg-hover hover:text-ink"
+                        }`}
+                      >
+                        <Mic size={14} /> {recording ? "Listening…" : "Voice"}
+                      </button>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[11.5px] text-faint">
+                      <Sparkle size={12} /> AI-assisted
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {attachment && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-line bg-well-muted px-3 py-2 text-[12.5px]">
+                  <Paperclip size={14} className="text-muted" />
+                  <span className="font-medium text-ink">{attachment}</span>
+                  <button type="button" disabled={submitting} onClick={() => setAttachment(null)} className="text-faint hover:text-ink disabled:opacity-40">
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => dismiss()}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!canSubmit}
+                onClick={handleSubmit}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90 disabled:cursor-wait disabled:opacity-90"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    <Check size={15} /> Submit
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )
+      }
+    </ModalFrame>
+  );
+};
+
+/* ---------------------------- command menu ---------------------------- */
+
+const BLUEBIRD_REMINDER: ReminderTarget = {
+  client: "Bluebird Studio",
+  invoice: "INV-1041",
+  amount: 1900,
+  statusLabel: "Overdue 12 days",
+  status: "overdue",
+};
+
+const COMMAND_INVOICES: { id: string; client: string; hint: string }[] = [
+  { id: "INV-1048", client: "Northstar Labs", hint: "Due this week" },
+  { id: "INV-1041", client: "Bluebird Studio", hint: "Overdue 12 days" },
+  { id: "INV-1039", client: "Bluebird Studio", hint: "Overdue 21 days" },
+  { id: "INV-1052", client: "Orbit AI", hint: "Expected Jun 28" },
+  { id: "INV-1042", client: "Atlas Creative", hint: "Paid" },
+];
+
+const CommandMenu: React.FC = () => {
+  const { open, setOpen } = useCommandPalette();
+  const { open: openAddEarning, claimed } = useAddEarning();
+  const openInvoice = useOpenInvoice();
+  const openReminder = useOpenReminder();
+  const { theme, toggleTheme } = useTheme();
+  const { toggleSidebar } = useSidebar();
+
+  const run = (action: () => void) => {
+    setOpen(false);
+    action();
+  };
+
+  return (
+    <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandInput placeholder="Search actions, invoices, pages…" />
+      <CommandList>
+        <CommandEmpty>No matches found.</CommandEmpty>
+
+        <CommandGroup heading="Actions">
+          <CommandItem
+            value="report income add earning cash payment"
+            disabled={claimed}
+            onSelect={() => run(openAddEarning)}
+          >
+            <Plus />
+            <span>Report income</span>
+            <CommandShortcut>Add earning</CommandShortcut>
+          </CommandItem>
+          <CommandItem value="export report earnings csv" onSelect={() => run(() => {})}>
+            <Download />
+            <span>Export earnings report</span>
+          </CommandItem>
+          <CommandItem
+            value="send reminder bluebird studio overdue inv-1041"
+            onSelect={() => run(() => openReminder(BLUEBIRD_REMINDER))}
+          >
+            <Send />
+            <span>Send reminder · Bluebird Studio</span>
+            <CommandShortcut>INV-1041</CommandShortcut>
+          </CommandItem>
+          <CommandItem
+            value="toggle appearance dark light theme"
+            onSelect={() => run(toggleTheme)}
+          >
+            <Eclipse />
+            <span>{theme === "light" ? "Switch to dark mode" : "Switch to light mode"}</span>
+          </CommandItem>
+          <CommandItem value="toggle sidebar navigation" onSelect={() => run(toggleSidebar)}>
+            <PanelLeft />
+            <span>Toggle sidebar</span>
+            <CommandShortcut>⌘B</CommandShortcut>
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Invoices">
+          {COMMAND_INVOICES.map((inv) => (
+            <CommandItem
+              key={inv.id}
+              value={`view invoice ${inv.id} ${inv.client} ${inv.hint}`}
+              onSelect={() => run(() => openInvoice(inv.id))}
+            >
+              <FileText />
+              <span>
+                {inv.id} · {inv.client}
+              </span>
+              <CommandShortcut>{inv.hint}</CommandShortcut>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Navigation">
+          {SIDEBAR_NAV.map((item) => (
+            <CommandItem
+              key={item.label}
+              value={`go to ${item.label} page navigation`}
+              onSelect={() => run(() => {})}
+            >
+              <item.icon />
+              <span>{item.label}</span>
+              {"active" in item && item.active ? <CommandShortcut>Current</CommandShortcut> : null}
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Settings">
+          {SIDEBAR_FOOTER_NAV.map((item) => (
+            <CommandItem
+              key={item.label}
+              value={`${item.label} settings`}
+              onSelect={() => run(() => {})}
+            >
+              <item.icon />
+              <span>{item.label}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </CommandDialog>
   );
 };
 
@@ -2000,7 +3389,115 @@ const Dashboard: React.FC = () => {
   const [reminder, setReminder] = useState<{ target: ReminderTarget; view: boolean } | null>(null);
   const [sentReminders, setSentReminders] = useState<Record<string, SentReminder>>({});
   const [clientNotes, setClientNotes] = useState<Record<string, string>>(INITIAL_CLIENT_NOTES);
-  const invoice = invoiceId ? INVOICES[invoiceId] : null;
+  const [pipeline, setPipeline] = useState<PipelineColumnData[]>(INITIAL_PIPELINE);
+  const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITY);
+  const [invoices, setInvoices] = useState<Record<string, Invoice>>(INITIAL_INVOICES);
+  const [showAddEarning, setShowAddEarning] = useState(false);
+  const [cashEarningClaimed, setCashEarningClaimed] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [earningsStats, setEarningsStats] = useState({
+    kpis: INITIAL_KPIS,
+    chart: INITIAL_CHART_ALL,
+  });
+  const processingTimer = React.useRef<number | null>(null);
+  const invoice = invoiceId ? invoices[invoiceId] : null;
+
+  useCommandShortcut(setCommandOpen);
+
+  React.useEffect(
+    () => () => {
+      if (processingTimer.current != null) window.clearTimeout(processingTimer.current);
+    },
+    []
+  );
+
+  const prependActivity = React.useCallback((item: ActivityItem) => {
+    setActivities((prev) => [item, ...prev].slice(0, ACTIVITY_VISIBLE_COUNT));
+  }, []);
+
+  const processEarning = React.useCallback(
+    (description: string, complete: (findings: CashMatchFindings) => void) => {
+      if (cashEarningClaimed) return;
+
+      setCashEarningClaimed(true);
+
+      const processingPayment: Payment = {
+        id: CASH_PAYMENT_ID,
+        client: CASH_MATCH_CLIENT,
+        invoice: CASH_MATCH_INVOICE,
+        amount: CASH_MATCH_AMOUNT,
+        due: "Matching invoice & client…",
+        status: "processing",
+      };
+
+      setPipeline((prev) =>
+        prev.map((col) => {
+          if (col.key === "due") {
+            return { ...col, items: col.items.filter((p) => p.id !== CASH_PAYMENT_ID) };
+          }
+          if (col.key === "processing") {
+            return { ...col, items: [processingPayment] };
+          }
+          return col;
+        })
+      );
+      prependActivity(buildCashProcessingActivity());
+
+      if (processingTimer.current != null) window.clearTimeout(processingTimer.current);
+      processingTimer.current = window.setTimeout(() => {
+        setPipeline((prev) =>
+          prev.map((col) => {
+            if (col.key === "processing") {
+              return { ...col, items: [] };
+            }
+            if (col.key === "paid") {
+              return {
+                ...col,
+                items: [
+                  {
+                    id: CASH_PAYMENT_ID,
+                    client: CASH_MATCH_CLIENT,
+                    invoice: CASH_MATCH_INVOICE,
+                    amount: CASH_MATCH_AMOUNT,
+                    due: "Paid just now",
+                    status: "paid",
+                    action: { label: "View", icon: Eye },
+                  },
+                  ...col.items.filter((p) => p.id !== CASH_PAYMENT_ID),
+                ],
+              };
+            }
+            return col;
+          })
+        );
+        prependActivity(buildCashMatchedActivity());
+        setInvoices((prev) => ({
+          ...prev,
+          [CASH_MATCH_INVOICE]: {
+            ...prev[CASH_MATCH_INVOICE],
+            status: "paid",
+            paidDate: "Jun 17, 2026",
+            dueLabel: "Paid just now",
+            paymentMethod: "Cash",
+            note: "Paid in full · Cash",
+          },
+        }));
+        setEarningsStats((prev) => applyCashEarningStats(prev.kpis, prev.chart));
+        complete({
+          client: CASH_MATCH_CLIENT,
+          invoiceId: CASH_MATCH_INVOICE,
+          amount: CASH_MATCH_AMOUNT,
+          description,
+          sources: [
+            { label: "Invoice", value: `${CASH_MATCH_INVOICE} · ${money(CASH_MATCH_AMOUNT)} due` },
+            { label: "Client", value: CASH_MATCH_CLIENT },
+            { label: "WhatsApp", value: "Jun 12 — \"Sending wire tomorrow\"" },
+          ],
+        });
+      }, CASH_PROCESSING_MS);
+    },
+    [cashEarningClaimed, prependActivity]
+  );
 
   const openReminder = (target: ReminderTarget, view = false) => setReminder({ target, view });
   const recordReminder = (r: SentReminder) => setSentReminders((prev) => ({ ...prev, [r.target.invoice]: r }));
@@ -2014,7 +3511,14 @@ const Dashboard: React.FC = () => {
   };
 
   return (
+    <CommandPaletteCtx.Provider value={{ open: commandOpen, setOpen: setCommandOpen }}>
     <ThemeProvider>
+    <ModalStackProvider>
+    <InvoicesCtx.Provider value={invoices}>
+    <EarningsStatsCtx.Provider value={earningsStats}>
+    <PipelineCtx.Provider value={pipeline}>
+    <ActivityCtx.Provider value={activities}>
+    <AddEarningCtx.Provider value={{ open: () => { if (!cashEarningClaimed) setShowAddEarning(true); }, claimed: cashEarningClaimed }}>
     <InvoiceCtx.Provider value={setInvoiceId}>
     <SentRemindersCtx.Provider value={sentReminders}>
     <ReminderCtx.Provider value={openReminder}>
@@ -2027,7 +3531,7 @@ const Dashboard: React.FC = () => {
         <div className="mx-auto w-full max-w-[1440px] space-y-6 px-4 py-5 md:px-6 md:py-6">
         {/* 1 — Financial health KPIs */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {KPIS.map((k) => (
+          {earningsStats.kpis.map((k) => (
             <KpiCard key={k.label} {...k} />
           ))}
         </section>
@@ -2050,22 +3554,33 @@ const Dashboard: React.FC = () => {
         </div>
 
         {invoice && <InvoicePreview invoice={invoice} onClose={() => setInvoiceId(null)} />}
+        {showAddEarning && (
+          <AddEarningModal onClose={() => setShowAddEarning(false)} onProcess={processEarning} />
+        )}
         {reminder && (
           <ReminderModal
             target={reminder.target}
             startInReceipt={reminder.view}
-            initial={sentReminders[reminder.target.invoice] ?? buildStoredReminder(reminder.target.invoice)}
+            initial={sentReminders[reminder.target.invoice] ?? buildStoredReminder(reminder.target.invoice, invoices)}
             onSent={recordReminder}
             onClose={() => setReminder(null)}
           />
         )}
+        <CommandMenu />
       </SidebarInset>
     </SidebarProvider>
     </ClientNotesCtx.Provider>
     </ReminderCtx.Provider>
     </SentRemindersCtx.Provider>
     </InvoiceCtx.Provider>
+    </AddEarningCtx.Provider>
+    </ActivityCtx.Provider>
+    </PipelineCtx.Provider>
+    </EarningsStatsCtx.Provider>
+    </InvoicesCtx.Provider>
+    </ModalStackProvider>
     </ThemeProvider>
+    </CommandPaletteCtx.Provider>
   );
 };
 

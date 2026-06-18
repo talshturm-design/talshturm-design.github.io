@@ -435,3 +435,19 @@ function SidebarMenuButton({
     </div>
   );
 }
+
+function SidebarInput({ className, ...props }: React.ComponentProps<"input">) {
+  return (
+    <input
+      data-sidebar="input"
+      className={cn(
+        "h-8 w-full min-w-0 rounded-xl border border-sidebar-border bg-sidebar-accent/40 px-3 py-1 text-[13px] text-sidebar-foreground shadow-none outline-none transition",
+        "placeholder:text-sidebar-foreground/45",
+        "focus-visible:border-sidebar-ring focus-visible:ring-2 focus-visible:ring-sidebar-ring/30",
+        "group-data-[collapsible=icon]:hidden",
+        className
+      )}
+      {...props}
+    />
+  );
+}
