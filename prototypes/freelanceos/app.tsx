@@ -2014,9 +2014,9 @@ const ActivityDetailModal: React.FC<{ item: ActivityItem; onClose: () => void }>
             <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${tone.bg} ${tone.text}`}>
               <item.icon size={16} />
             </span>
-            <div className="min-w-0 pr-2">
-              <p className="text-[15px] leading-snug text-muted [&_b]:font-semibold [&_b]:text-ink">{item.text}</p>
-              <div className="mt-1 text-[12px] text-faint">{item.time}</div>
+            <div className="min-w-0 space-y-0.5 pr-2">
+              <p className="text-[15px] font-semibold tracking-tight text-muted [&_b]:font-semibold [&_b]:text-ink">{item.text}</p>
+              <div className="text-[12px] text-faint">{item.time}</div>
             </div>
           </div>
           <button
@@ -3124,13 +3124,13 @@ const AddEarningModal: React.FC<{
               </dl>
             </div>
 
-            <div className="flex items-center justify-between gap-3 border-t border-line px-6 py-4">
+            <div className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
               <button
                 type="button"
                 onClick={() => dismiss()}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-muted transition hover:bg-hover hover:text-ink"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover"
               >
-                Not quite
+                Match manually
               </button>
               <button
                 type="button"
@@ -3163,17 +3163,16 @@ const AddEarningModal: React.FC<{
             </div>
 
             <div className="modal-scroll flex-1 space-y-4 overflow-y-auto px-6 py-5">
-              <div className="rounded-2xl border border-line bg-well-muted p-1">
-                <div className="rounded-[14px] border border-line bg-card">
-                  <textarea
-                    value={displayText}
-                    onChange={(e) => typingDone && setMessage(e.target.value)}
-                    rows={5}
-                    readOnly={!typingDone || submitting}
-                    placeholder="Tell wipOS what you received…"
-                    className={`w-full resize-none rounded-[14px] bg-transparent px-4 py-3.5 text-[14px] leading-relaxed text-ink outline-none placeholder:text-faint ${!typingDone ? "caret-transparent" : ""} ${INPUT_FOCUS}`}
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2">
+              <div className={`overflow-hidden rounded-xl border border-line-strong bg-card transition focus-within:border-line-strong focus-within:ring-2 focus-within:ring-ring`}>
+                <textarea
+                  value={displayText}
+                  onChange={(e) => typingDone && setMessage(e.target.value)}
+                  rows={5}
+                  readOnly={!typingDone || submitting}
+                  placeholder="Tell wipOS what you received…"
+                  className={`w-full resize-none border-0 bg-transparent px-3.5 py-3 text-[14px] leading-relaxed text-ink outline-none placeholder:text-faint ${!typingDone ? "caret-transparent" : ""}`}
+                />
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-3 py-2">
                     <div className="flex items-center gap-1">
                       <input
                         ref={fileRef}
@@ -3204,11 +3203,20 @@ const AddEarningModal: React.FC<{
                         <Mic size={14} /> {recording ? "Listening…" : "Voice"}
                       </button>
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[11.5px] text-faint">
-                      <Sparkle size={12} /> AI-assisted
-                    </span>
+                    <button
+                      type="button"
+                      disabled={!canSubmit}
+                      onClick={handleSubmit}
+                      aria-label={submitting ? "Processing" : "Submit earning"}
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {submitting ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <ArrowUp size={16} strokeWidth={2.25} />
+                      )}
+                    </button>
                   </div>
-                </div>
               </div>
 
               {attachment && (
@@ -3220,34 +3228,6 @@ const AddEarningModal: React.FC<{
                   </button>
                 </div>
               )}
-            </div>
-
-            <div className="flex items-center justify-end gap-2 border-t border-line px-6 py-4">
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={() => dismiss()}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-card px-3.5 py-2 text-[13px] font-medium text-ink transition hover:bg-hover disabled:opacity-40"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={!canSubmit}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-[13px] font-semibold text-primary-fg transition hover:opacity-90 disabled:cursor-wait disabled:opacity-90"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" />
-                    Processing…
-                  </>
-                ) : (
-                  <>
-                    <Check size={15} /> Submit
-                  </>
-                )}
-              </button>
             </div>
           </>
         )
