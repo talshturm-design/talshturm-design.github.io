@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>wipOS — Research</title>
-  <meta name="description" content="How the wipOS user research was run — from landscape analysis and surveys to synthesis, themes, and prototype design." />
+  <title>wipOS - Research</title>
+  <meta name="description" content="How the wipOS user research was run - from landscape analysis and surveys to synthesis, themes, and prototype design." />
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
@@ -111,6 +111,27 @@
     .timeline-line {
       background: linear-gradient(to bottom, var(--color-border) 0%, var(--color-border) 100%);
     }
+    @keyframes brand-icon-dash-tick {
+      0%, 11.71875% { transform: rotate(0deg); }
+      12.5%, 24.21875% { transform: rotate(45deg); }
+      25%, 36.71875% { transform: rotate(90deg); }
+      37.5%, 49.21875% { transform: rotate(135deg); }
+      50%, 61.71875% { transform: rotate(180deg); }
+      62.5%, 74.21875% { transform: rotate(225deg); }
+      75%, 86.71875% { transform: rotate(270deg); }
+      87.5%, 99.21875% { transform: rotate(315deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .brand-icon-dash {
+      transform-origin: center;
+      animation: brand-icon-dash-tick 32s linear infinite;
+    }
+    .brand-toggle:hover .brand-icon-dash {
+      animation-play-state: paused;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .brand-icon-dash { animation: none; }
+    }
     .data-table-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -146,6 +167,8 @@
     .data-table tr:last-child td { border-bottom: none; }
     .data-table td:first-child { font-weight: 600; color: var(--color-ink); }
     .data-table td:not(:first-child) { color: var(--color-muted); }
+    .data-table--flows td:nth-child(3) { color: var(--color-primary); font-weight: 500; }
+    .data-table--themes td:nth-child(4) { color: var(--color-primary); font-weight: 500; }
     .data-table .rank-cell {
       width: 3rem;
       font-variant-numeric: tabular-nums;
@@ -161,9 +184,9 @@
 <body class="font-sans text-ink antialiased">
   <header class="header-frost sticky top-0 z-30">
     <div class="mx-auto flex max-w-[960px] items-center justify-between px-4 py-4 md:px-6">
-      <div class="flex items-center gap-3">
+      <div class="brand-toggle flex items-center gap-3">
         <span class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-fg" aria-hidden="true">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <svg class="brand-icon-dash h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10" stroke-dasharray="3.5 3.5"/>
           </svg>
         </span>
@@ -191,7 +214,7 @@
         From landscape scan to working prototype
       </h1>
       <p class="mt-3 max-w-[42rem] text-[14px] leading-relaxed text-muted">
-        A six-phase research arc for wipOS — blending desk research, real freelancer voices, synthesis documents,
+        A six-phase research arc for wipOS - blending desk research, real freelancer voices, synthesis documents,
         and iterative design. AI tools accelerated drafting and analysis; judgment and follow-up stayed human.
       </p>
       <div class="mt-4 flex flex-wrap gap-2">
@@ -204,7 +227,7 @@
     <section aria-labelledby="phases-title">
       <div class="mb-6">
         <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="phases-title">Phases</h2>
-        <p class="mt-1 text-[13px] text-muted">Each step built on the last — from understanding the space to shipping a clickable prototype.</p>
+        <p class="mt-1 text-[13px] text-muted">Each step built on the last - from understanding the space to shipping a clickable prototype.</p>
       </div>
 
       <ol class="relative space-y-0">
@@ -223,11 +246,11 @@
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
               Started with a wide desk pass: what freelancers already use to track income and chase payments,
               how competitors present financial clarity, and where the visual language feels calm vs. overwhelming.
-              From that, drafted survey questions aimed at validating the real pain — not assumptions.
+              From that, drafted survey questions aimed at validating the real pain - not assumptions.
             </p>
             <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
               <li class="flex gap-2"><span class="text-faint">·</span><span>Deep research on current solutions in the category</span></li>
-              <li class="flex gap-2"><span class="text-faint">·</span><span>Competitive visual audit — layout, tone, information hierarchy</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Competitive visual audit - layout, tone, information hierarchy</span></li>
               <li class="flex gap-2"><span class="text-faint">·</span><span>Survey question set for problem validation</span></li>
             </ul>
           </article>
@@ -248,7 +271,7 @@
             </div>
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
               Ran a 1:1 survey with eight Israeli freelancers and small-business owners. Followed up on replies
-              where answers needed context. Compared raw responses against the earlier desk research — spotting
+              where answers needed context. Compared raw responses against the earlier desk research - spotting
               overlap, surprises, and gaps worth designing for.
             </p>
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
@@ -279,14 +302,14 @@
               </div>
             </div>
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
-              Mapped how money actually moves — from finished work through invoicing, reminders, bank arrival,
+              Mapped how money actually moves - from finished work through invoicing, reminders, bank arrival,
               and reconciliation. Turned scattered survey stories into a shared flow the team could design against.
             </p>
 
             <div class="mt-5">
               <p class="mb-3 text-[12px] font-medium uppercase tracking-wide text-faint">Freelancer payment workflow, from project completion to money received</p>
               <div class="data-table-wrap">
-                <table class="data-table">
+                <table class="data-table data-table--flows">
                   <thead>
                     <tr>
                       <th scope="col">Step</th>
@@ -375,7 +398,7 @@
               </div>
             </div>
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
-              Pulled recurring ideas into broader themes — the emotional weight of chasing payments, fragmented
+              Pulled recurring ideas into broader themes - the emotional weight of chasing payments, fragmented
               tools, cash-flow anxiety, and the wish for something automatic but gentle. These became the
               north stars for product and visual direction.
             </p>
@@ -383,7 +406,7 @@
             <div class="mt-5">
               <p class="mb-3 text-[12px] font-medium uppercase tracking-wide text-faint">Top themes</p>
               <div class="data-table-wrap">
-                <table class="data-table">
+                <table class="data-table data-table--themes">
                   <thead>
                     <tr>
                       <th scope="col">Rank</th>
@@ -461,8 +484,8 @@
               These kept later iterations aligned with research instead of drifting into generic dashboard patterns.
             </p>
             <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
-              <li class="flex gap-2"><span class="text-faint">·</span><span>Solution baseline — scope, jobs-to-be-done, success criteria</span></li>
-              <li class="flex gap-2"><span class="text-faint">·</span><span>Design baseline — calm Apple-inspired system, typography, component behavior</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Solution baseline - scope, jobs-to-be-done, success criteria</span></li>
+              <li class="flex gap-2"><span class="text-faint">·</span><span>Design baseline - calm Apple-inspired system, typography, component behavior</span></li>
             </ul>
           </article>
         </li>
@@ -479,7 +502,7 @@
               </div>
             </div>
             <p class="mt-3 text-[13.5px] leading-relaxed text-muted">
-              Built the wipOS prototype in Cursor — dashboard, modals, command palette, and polish passes.
+              Built the wipOS prototype in Cursor - dashboard, modals, command palette, and polish passes.
               Each round tightened spacing, motion, and copy until the experience matched the research themes:
               one calm place for income clarity, not another accounting tool.
             </p>
@@ -500,7 +523,7 @@
     <section aria-labelledby="methods-title">
       <div class="mb-4">
         <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="methods-title">How AI was used</h2>
-        <p class="mt-1 text-[13px] text-muted">Transparency on tooling — AI sped up drafting; decisions stayed intentional.</p>
+        <p class="mt-1 text-[13px] text-muted">Transparency on tooling - AI sped up drafting; decisions stayed intentional.</p>
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
@@ -514,6 +537,108 @@
         <article class="rounded-2xl border border-line bg-card p-5 shadow-card">
           <h3 class="text-[14px] font-semibold text-ink">Manual</h3>
           <p class="mt-2 text-[13px] leading-relaxed text-muted">Survey outreach, follow-up conversations, judgment calls, and final editorial choices on what to ship.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="scope-title">
+      <div class="mb-4">
+        <h2 class="text-[17px] font-semibold tracking-[-0.01em] text-ink" id="scope-title">Product focus</h2>
+        <p class="mt-1 max-w-[42rem] text-[13px] leading-relaxed text-muted">
+          Research surfaced a wide problem space. The prototype deliberately narrows to the stretch after work is done -
+          when freelancers need to see what they&apos;ve earned and shepherd payments in, without becoming accountants.
+        </p>
+      </div>
+
+      <div class="mb-5 flex flex-wrap items-center gap-2 text-[12px]">
+        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 font-medium text-faint">Before earnings</span>
+        <svg class="h-3.5 w-3.5 text-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+        <span class="inline-flex items-center rounded-full border border-line-strong bg-primary px-3 py-1 font-medium text-primary-fg">wipOS focus</span>
+        <svg class="h-3.5 w-3.5 text-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+        <span class="inline-flex items-center rounded-full border border-line bg-well-muted px-3 py-1 font-medium text-faint">After collections</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <article class="rounded-2xl border border-line bg-card p-5 shadow-card md:p-6">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">In scope</p>
+          <h3 class="mt-2 text-[16px] font-semibold text-ink">What wipOS earnings dashboard focuses on</h3>
+          <p class="mt-2 text-[13px] leading-relaxed text-muted">The core loop: know what you&apos;ve made, and stay on top of getting paid.</p>
+
+          <div class="mt-5 space-y-5">
+            <div>
+              <h4 class="text-[14px] font-semibold text-ink">Earnings visibility</h4>
+              <p class="mt-1 text-[13px] leading-relaxed text-muted">A calm read on income - not a full accounting suite.</p>
+              <ul class="mt-3 space-y-2">
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Income and payments tied to invoices</span>
+                </li>
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Earnings KPIs at a glance</span>
+                </li>
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Earnings over time</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="border-t border-line pt-5">
+              <h4 class="text-[14px] font-semibold text-ink">Managing payment collections</h4>
+              <p class="mt-1 text-[13px] leading-relaxed text-muted">Everything that happens while money is still in motion.</p>
+              <ul class="mt-3 space-y-2">
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Reminders and follow-ups</span>
+                </li>
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Reconciling data and communication</span>
+                </li>
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Invoice status overview</span>
+                </li>
+                <li class="flex gap-2.5 text-[13px] leading-relaxed text-ink">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                  <span>Client payment status and insights</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl border border-line bg-well-muted p-5 md:p-6">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-faint">Out of scope</p>
+          <h3 class="mt-2 text-[16px] font-semibold text-ink">What I left for later</h3>
+          <p class="mt-2 text-[13px] leading-relaxed text-muted">
+            Valid problems - just upstream or downstream of the moment wipOS is designed for.
+          </p>
+
+          <div class="mt-5 space-y-5">
+            <div class="rounded-xl border border-line bg-card/60 p-4">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-faint">Earlier · before earnings</p>
+              <h4 class="mt-1.5 text-[14px] font-semibold text-ink">Projects &amp; invoice creation</h4>
+              <p class="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Scoping work, planning effort, quoting, and building invoices - everything that happens before
+                income and collections become the daily concern.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-line bg-card/60 p-4">
+              <p class="text-[11px] font-medium uppercase tracking-wide text-faint">Later · after collections</p>
+              <h4 class="mt-1.5 text-[14px] font-semibold text-ink">Expenses &amp; taxes</h4>
+              <p class="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Tracking spend, filing obligations, and net-after-tax views - important, but once payment
+                has already landed and been reconciled.
+              </p>
+            </div>
+          </div>
         </article>
       </div>
     </section>
