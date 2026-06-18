@@ -6,6 +6,9 @@
   <title>wipOS — Earnings</title>
   <meta name="description" content="A calm financial control center for freelancers — paid, expected, and overdue income at a glance." />
 
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./assets/favicon.svg" />
+
   <script>
     try {
       const stored = localStorage.getItem("wipos-theme");
@@ -172,7 +175,6 @@
     }
     input:focus, textarea:focus, input:focus-visible, textarea:focus-visible { outline: none; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-    #boot { font-family: -apple-system, Inter, system-ui, sans-serif; color: var(--color-faint); }
     .hover-card {
       border: 1px solid var(--color-border);
       background-color: var(--color-hover-card);
@@ -211,13 +213,81 @@
       from { opacity: 1; transform: none; }
       to { opacity: 0; transform: translateY(10px) scale(0.985); }
     }
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-canvas);
+    }
+    .boot-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: min(17.5rem, 72vw);
+      gap: 0.75rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.45s ease;
+    }
+    .boot-group.is-visible { opacity: 1; }
+    .boot-group.is-exiting { opacity: 0; }
+    .boot-title {
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      color: var(--color-ink);
+    }
+    .boot-message {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--color-muted);
+    }
+    .boot-bar {
+      width: 100%;
+      height: 2px;
+      margin-top: 0.25rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--color-surface);
+    }
+    .boot-bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: 999px;
+      background: var(--color-ink);
+    }
+    .boot-bar-fill.is-loading {
+      animation: bootBarFill 2s ease-in-out forwards;
+    }
+    @keyframes bootBarFill { to { width: 100%; } }
+    #root.app-shell--hidden { opacity: 0; }
+    #root.app-shell--visible {
+      opacity: 1;
+      transition: opacity 0.45s ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .boot-group,
+      #root.app-shell--visible { transition: none; }
+      .boot-bar-fill.is-loading { animation: none; width: 100%; }
+    }
   </style>
 </head>
 <body class="font-sans text-ink antialiased">
-  <div id="root"></div>
+  <div id="root" class="app-shell--hidden"></div>
 
-  <div id="boot" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;">
-    Loading wipOS…
+  <div id="boot" aria-live="polite" aria-busy="true">
+    <div class="boot-group">
+      <div class="boot-title brand-title">wipOS</div>
+      <p class="boot-message">Getting your workspace ready…</p>
+      <div class="boot-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="boot-bar-fill"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Module resolution for the CDN React stack -->
@@ -237,7 +307,12 @@
   <!-- In-browser TSX transpile so the source stays clean TypeScript -->
   <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
   <script type="module">
-    try {
+    const BOOT_FADE_MS = 450;
+    const BAR_MS = 2000;
+
+    const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+    async function loadApp() {
       const markerSidebar = '/* ---- shadcn sidebar inject ---- */';
       const markerCommand = '/* ---- shadcn command inject ---- */';
       const [sidebarSrc, commandSrc, appSrc] = await Promise.all([
@@ -259,10 +334,55 @@
       });
       const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
       await import(url);
-      document.getElementById('boot')?.remove();
+    }
+
+    async function runBootSequence(appReady) {
+      const boot = document.getElementById('boot');
+      const group = boot?.querySelector('.boot-group');
+      const fill = boot?.querySelector('.boot-bar-fill');
+      const root = document.getElementById('root');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!boot || !group || !fill || !root) {
+        await appReady;
+        boot?.remove();
+        root.classList.remove('app-shell--hidden');
+        root.classList.add('app-shell--visible');
+        return;
+      }
+
+      if (reduced) {
+        fill.classList.add('is-loading');
+        await Promise.all([appReady, sleep(BAR_MS)]);
+        boot.remove();
+        root.classList.remove('app-shell--hidden');
+        root.classList.add('app-shell--visible');
+        return;
+      }
+
+      await sleep(16);
+      group.classList.add('is-visible');
+      await sleep(BOOT_FADE_MS);
+
+      fill.classList.add('is-loading');
+      await Promise.all([appReady, sleep(BAR_MS)]);
+
+      group.classList.remove('is-visible');
+      group.classList.add('is-exiting');
+      await sleep(BOOT_FADE_MS);
+
+      boot.remove();
+      root.classList.remove('app-shell--hidden');
+      root.classList.add('app-shell--visible');
+    }
+
+    try {
+      await runBootSequence(loadApp());
     } catch (err) {
       const boot = document.getElementById('boot');
-      if (boot) boot.textContent = 'Failed to load: ' + err.message;
+      if (boot) {
+        boot.innerHTML = `<div class="boot-group is-visible" style="opacity:1"><p class="boot-message">Failed to load · ${err.message}</p></div>`;
+      }
       console.error(err);
     }
   </script>

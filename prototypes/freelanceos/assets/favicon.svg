@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="wipOS">
+  <circle cx="16" cy="16" r="16" fill="#1d1d1f"/>
+  <circle
+    cx="16"
+    cy="16"
+    r="5.5"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-dasharray="2.75 2.75"
+  />
+</svg>
