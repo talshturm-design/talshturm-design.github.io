@@ -70,6 +70,7 @@
       --color-well: #f5f5f7;
       --color-well-muted: #f5f5f7;
       --color-well-soft: #fafafa;
+      --color-scope-out: #fafafc;
       --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
       --shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.06);
     }
@@ -88,6 +89,7 @@
       --color-well: #2c2c2e;
       --color-well-muted: #252528;
       --color-well-soft: #323234;
+      --color-scope-out: #18181b;
       --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
       --shadow-lift: 0 6px 24px rgba(0, 0, 0, 0.45);
     }
@@ -174,6 +176,9 @@
       font-variant-numeric: tabular-nums;
       color: var(--color-faint);
     }
+    .scope-out-panel {
+      background: var(--color-scope-out);
+    }
     @media (prefers-reduced-motion: no-preference) {
       html.theme-changing, html.theme-changing * {
         transition: background-color 0.22s ease, color 0.18s ease, border-color 0.22s ease !important;
@@ -247,7 +252,7 @@
               how competitors present financial clarity, and where the visual language feels calm vs. overwhelming.
               From that, drafted survey questions aimed at validating the real pain - not assumptions.
             </p>
-            <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
+            <ul class="mt-4 space-y-2 text-[13px] font-medium leading-relaxed text-ink">
               <li class="flex gap-2"><span class="text-faint">·</span><span>Deep research on current solutions in the category</span></li>
               <li class="flex gap-2"><span class="text-faint">·</span><span>Competitive visual audit - layout, tone, information hierarchy</span></li>
               <li class="flex gap-2"><span class="text-faint">·</span><span>Survey question set for problem validation</span></li>
@@ -482,7 +487,7 @@
               do and feel like) and a design baseline (visual tone, density, and interaction principles).
               These kept later iterations aligned with research instead of drifting into generic dashboard patterns.
             </p>
-            <ul class="mt-4 space-y-2 text-[13px] leading-relaxed text-ink">
+            <ul class="mt-4 space-y-2 text-[13px] font-medium leading-relaxed text-ink">
               <li class="flex gap-2"><span class="text-faint">·</span><span>Solution baseline - scope, jobs-to-be-done, success criteria</span></li>
               <li class="flex gap-2"><span class="text-faint">·</span><span>Design baseline - calm Apple-inspired system, typography, component behavior</span></li>
             </ul>
@@ -622,7 +627,7 @@
           </div>
         </article>
 
-        <article class="rounded-2xl border border-line bg-well-muted p-5 md:p-6">
+        <article class="scope-out-panel rounded-2xl border border-line p-5 md:p-6">
           <p class="text-[11px] font-medium uppercase tracking-wide text-faint">Out of scope</p>
           <h3 class="mt-2 text-[16px] font-semibold text-ink">What I left for later</h3>
           <p class="mt-2 text-[13px] leading-relaxed text-muted">

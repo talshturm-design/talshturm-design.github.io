@@ -3162,7 +3162,7 @@ const AddEarningModal: React.FC<{
               </button>
             </div>
 
-            <div className="modal-scroll flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            <div className="modal-scroll flex-1 space-y-4 overflow-y-auto p-6">
               <div className={`overflow-hidden rounded-xl border border-line-strong bg-card transition focus-within:border-line-strong focus-within:ring-2 focus-within:ring-ring`}>
                 <textarea
                   value={displayText}
