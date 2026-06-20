@@ -1671,7 +1671,8 @@ const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
       <td className="px-4 py-3.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <StatusPill tone={tone} label={STATUS_LABEL[invoice.status]} dot={false} />
-          {invoice.status !== "overdue" && <StatusPill tone="slate" label="Viewed" dot={false} />}
+          {invoice.status === "paid" && <StatusPill tone="slate" label="Receipt sent" dot={false} />}
+          {invoice.status !== "overdue" && invoice.status !== "paid" && <StatusPill tone="slate" label="Viewed" dot={false} />}
         </div>
       </td>
       <td className="px-4 py-3.5 text-[13px] text-muted">{invoice.terms}</td>
@@ -2605,6 +2606,7 @@ const InvoicePreview: React.FC<{ invoice: Invoice; onClose: () => void }> = ({ i
           </div>
           <div className="flex items-center gap-2.5">
             <StatusPill tone={tone} label={STATUS_LABEL[invoice.status]} dot={false} />
+            {invoice.status === "paid" && <StatusPill tone="slate" label="Receipt sent" dot={false} />}
             {invoice.status !== "overdue" && invoice.status !== "paid" && <StatusPill tone="slate" label="Viewed" dot={false} />}
             <button
               onClick={() => dismiss()}
