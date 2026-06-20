@@ -665,18 +665,11 @@
   <script>
     const root = document.documentElement;
     const toggle = document.getElementById("theme-toggle");
-    const label = document.getElementById("theme-label");
-
-    const syncThemeLabel = () => {
-      label.textContent = root.classList.contains("dark") ? "Light mode" : "Dark mode";
-    };
-    syncThemeLabel();
 
     toggle.addEventListener("click", () => {
       root.classList.add("theme-changing");
       const next = root.classList.toggle("dark") ? "dark" : "light";
       try { localStorage.setItem("wipos-theme", next); } catch (_) {}
-      syncThemeLabel();
       window.setTimeout(() => root.classList.remove("theme-changing"), 260);
     });
   </script>
